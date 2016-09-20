@@ -15,11 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.views.decorators.csrf import csrf_exempt
 
 from pvs.views import pvs_report
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
-    url(r'^pvs/report/$', pvs_report),
+    url(r'^pvs/report/$', csrf_exempt(pvs_report)),
 ]
