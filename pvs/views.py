@@ -54,23 +54,25 @@ def pvs_report_data_update(pvs_info):
         }
     
     '''
-    if pvs_info.get('version',None) != 'v1':
-        raise Exception('api version error')
+    api_version = pvs_info.get('data',{}).get('version',None)
+    if api_version != 'v1':
+        logger.warning('error version %s' % pvs_info.get('version',None))
+        return
     
     pvs_serial = pvs_info.get('data',{}).get('cpuinfo',{}).get('serial',None)
     if pvs_serial is None:
-        logging.warning('no pi serial data exist, skip pvs_report process!')
+        logger.warning('no pi serial data exist, skip pvs_report process!')
     else: 
         entry, created = Report.objects.get_or_create(serial=pvs_serial)
         if created:
-            logging.info('new pvstation report event with serial: %s' % pvs_serial)
+            logger.info('new pvstation report event with serial: %s' % pvs_serial)
         entry.ip = pvs_info.get('ip')
         entry.hardware = pvs_info.get('data',{}).get('cpuinfo',{}).get('hardware','')
         entry.revision = pvs_info.get('data',{}).get('cpuinfo',{}).get('revision','')
         entry.dbconfig = json.dumps(pvs_info.get('data',{}).get('dbconfig',{}))
         entry.last_update_time = datetime.now()
         entry.save()
-        logging.info('pvs (%s) report saved' % pvs_serial)
+        logger.info('pvs (%s) report saved' % pvs_serial)
     
 def pvs_report(request):
 
