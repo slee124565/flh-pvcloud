@@ -182,6 +182,9 @@ def pvs_dbconfig(request):
             logger.info('pvs serial (%s) dbconfig id (%s) update success' % (pvs_resp.get('serial'),
                                                                              pvs_resp.get('config_id')))
         
+            response = HttpResponse(content_type='text/plain')
+            response.content = 'OK'
+            return response
     else:
         logger.warning('HTTP method not support, skip' % request.method)
         return HttpResponseBadRequest('Bad Param Request')
