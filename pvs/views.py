@@ -142,6 +142,7 @@ def pvs_dbconfig(request):
                                     ).order_by('id')[:1]
             if len(queryset) > 0:
                 entry = queryset[0]
+                logger.debug('pvs_dbconfig entry:\n %s' % str(entry.__dict__))
                 logger.info('new dbconfig for pvs %s with json dump data: %s' % (pi_serial,
                                                                             entry.dbconfig) )
                 resp_data = {
