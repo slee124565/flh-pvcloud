@@ -119,19 +119,19 @@ def pvs_dbconfig(request):
         sserial = request.GET.get('sserial',None)
         if sserial is None:
             logger.warning('no sserial data exist, skip!')
-            return HttpResponseBadRequest()
+            return HttpResponseBadRequest('Bad Param Request')
         else:
             serial_time = signing.loads(sserial,PVS_SECRET_KEY)
             if serial_time.find('-') == -1:
                 logger.warning('bad param serial_time %s request' % serial_time)
-                return HttpResponseBadRequest()
+                return HttpResponseBadRequest('Bad Param Request')
             pi_serial = serial_time.split('-')[0]
             signing_time = (serial_time.split('-')[1]).strptime('%Y%m%d%H%M%S')
             logger.debug('(serial,signing_time) : (%s, %s)' % (pi_serial,str(signing_time)))
             if (signing_time+timedelta(minutes=+30) < datetime.now()):
                 logger.warning('bad param signing_time %s at time %s' % (str(signing_time),
                                                                          str(datetime.now())))
-                return HttpResponseBadRequest()
+                return HttpResponseBadRequest('Bad Param Request')
             queryset = DbConfig.objects.filter(serial=pi_serial
                                     ).filter(pvs_updated=False
                                     ).order_by('id')[:1]
@@ -155,4 +155,4 @@ def pvs_dbconfig(request):
         pass
     else:
         logger.warning('HTTP method not support, skip' % request.method)
-        return HttpResponseBadRequest()
+        return HttpResponseBadRequest('Bad Param Request')
