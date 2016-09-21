@@ -112,7 +112,7 @@ def pvs_dbconfig(request):
     implement web api for pvs self-update dbconfig acknowledge feature
     HTTP POST method for pvs to ack to server new dbconfig updated
     payload with signing.dumps json data
-    { 'id' = 'xxx', 'serial': '<pi_serial>', 'result':'pass|fail' }
+    { 'config_id' = 'xxx', 'serial': '<pi_serial>', 'result':'pass|fail' }
     '''
     
     if request.method == 'GET':
@@ -152,7 +152,30 @@ def pvs_dbconfig(request):
             return response
                 
     elif request.method == 'POST':
-        pass
+        encrypt_data = request.POST.get('data',None)
+        if encrypt_data is None:
+            logger.warning('no param data payload')
+            return HttpResponseBadRequest('Bad Param Request')
+        
+        pvs_resp = signing.loads(encrypt_data,PVS_SECRET_KEY)
+        config_id = pvs_resp.get('config_id', None)
+        if config_id is None:
+            logger.warning('no param config_id in pvs response data: %s' % str(pvs_resp))
+            return HttpResponseBadRequest('Bad Param Request')
+        
+        if pvs_resp.get('result','fail') == 'fail':
+            logger.info('dbconfig id %s pvs report update fail!' % config_id)
+        else:
+            dbconfig = DbConfig.objects.get(id=config_id)
+            if dbconfig is None:
+                logger.warning('pvs report dbconfig id %s not exist!' % config_id)
+                return HttpResponseBadRequest('Bad Param Request')
+            dbconfig.pvs_update_time = datetime.now()
+            dbconfig.pvs_updated = True
+            dbconfig.save()
+            logger.info('pvs serial (%s) dbconfig id (%s) update success' % (pvs_resp.get('serial'),
+                                                                             pvs_resp.get('config_id')))
+        
     else:
         logger.warning('HTTP method not support, skip' % request.method)
         return HttpResponseBadRequest()
