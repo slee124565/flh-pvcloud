@@ -12,3 +12,10 @@ class Report(models.Model):
     serial = models.CharField('pi serial', max_length=20,default='')
     dbconfig = models.TextField('pvs dbconfig', default='{}')
     last_update_time = models.DateTimeField('last update time',default=datetime.now)
+
+class DbConfig(models.Model):
+    serial = models.CharField('pi serial', max_length=20)
+    dbconfig = models.TextField('pvs dbconfig', default='{}')
+    create_time = models.DateTimeField('created time', default=datetime.now)
+    pvs_update_time = models.DateTimeField('pvs update time', null=True)
+    pvs_updated = models.BooleanField('pvs update acked', default=False)

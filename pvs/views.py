@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.core import signing
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from ipware.ip import get_real_ip
 
-from .models import Report
+from .models import Report, DbConfig
 
 import logging
 logger = logging.getLogger(__name__)
@@ -75,6 +75,7 @@ def pvs_report_data_update(pvs_info):
         logger.info('pvs (%s) report saved' % pvs_serial)
     
 def pvs_report(request):
+    '''HTTP POST method for pvs to report it information for pvcloud'''
 
     pvs_ip = get_real_ip(request)
     if pvs_ip == None:
@@ -101,3 +102,89 @@ def pvs_report(request):
     response.content = json.dumps(pvs_info,indent=2)   
     return response
     
+def pvs_dbconfig(request):
+    '''implement web api for pvs self-update dbconfig query feature
+    HTTP GET method for pvs to query its new DbConfig
+    querystring with sserial=<signed([pi_seria-timestamp])>
+    response singing.dumps({'config_id': 'xxx', 'data': <json data>}) 
+    data if exist
+    
+    implement web api for pvs self-update dbconfig acknowledge feature
+    HTTP POST method for pvs to ack to server new dbconfig updated
+    payload with signing.dumps json data
+    { 'config_id' = 'xxx', 'serial': '<pi_serial>', 'result':'pass|fail' }
+    '''
+    
+    if request.method == 'GET':
+        sserial = request.GET.get('sserial',None)
+        if sserial is None:
+            logger.warning('no sserial data exist, skip!')
+            return HttpResponseBadRequest('Bad Param Request')
+        else:
+            serial_time = signing.loads(sserial,PVS_SECRET_KEY)
+            if len(serial_time) != 1:
+                logger.warning('bad param serial_time %s request' % serial_time)
+                return HttpResponseBadRequest('Bad Param Request')
+            serial_time = serial_time[0]
+            if serial_time.find('-') == -1:
+                logger.warning('bad param serial_time %s request' % serial_time)
+                return HttpResponseBadRequest('Bad Param Request')
+            logger.debug('(serial, signing_time): (%s,%s)' % (serial_time.split('-')[0],serial_time.split('-')[1] ))
+            pi_serial = serial_time.split('-')[0]
+            signing_time = datetime.strptime(serial_time.split('-')[1],'%Y%m%d%H%M%S')
+            logger.debug('(serial,signing_time) : (%s, %s)' % (pi_serial,str(signing_time)))
+            if (signing_time+timedelta(minutes=+30) < datetime.now()):
+                logger.warning('bad param signing_time %s at time %s' % (str(signing_time),
+                                                                         str(datetime.now())))
+                return HttpResponseBadRequest('Bad Param Request')
+            queryset = DbConfig.objects.filter(serial=pi_serial
+                                    ).filter(pvs_updated=False
+                                    ).order_by('id')[:1]
+            if len(queryset) > 0:
+                entry = queryset[0]
+                logger.debug('pvs_dbconfig entry:\n %s' % str(entry.__dict__))
+                logger.info('new dbconfig for pvs %s with json dump data: %s' % (pi_serial,
+                                                                            entry.dbconfig) )
+                resp_data = {
+                            'config_id': entry.id,
+                            'data' : json.loads(entry.dbconfig) 
+                            }
+            else:
+                logger.debug('no dbconfig for pvs %s' % pi_serial)
+                resp_data = {}
+
+            response = HttpResponse(content_type='text/plain')
+            response.content = signing.dumps(resp_data,PVS_SECRET_KEY)   
+            return response
+                
+    elif request.method == 'POST':
+        encrypt_data = request.POST.get('data',None)
+        if encrypt_data is None:
+            logger.warning('no param data payload')
+            return HttpResponseBadRequest('Bad Param Request')
+        
+        pvs_resp = signing.loads(encrypt_data,PVS_SECRET_KEY)
+        config_id = pvs_resp.get('config_id', None)
+        if config_id is None:
+            logger.warning('no param config_id in pvs response data: %s' % str(pvs_resp))
+            return HttpResponseBadRequest('Bad Param Request')
+        
+        if pvs_resp.get('result','fail') == 'fail':
+            logger.info('dbconfig id %s pvs report update fail!' % config_id)
+        else:
+            dbconfig = DbConfig.objects.get(id=config_id)
+            if dbconfig is None:
+                logger.warning('pvs report dbconfig id %s not exist!' % config_id)
+                return HttpResponseBadRequest('Bad Param Request')
+            dbconfig.pvs_update_time = datetime.now()
+            dbconfig.pvs_updated = True
+            dbconfig.save()
+            logger.info('pvs serial (%s) dbconfig id (%s) update success' % (pvs_resp.get('serial'),
+                                                                             pvs_resp.get('config_id')))
+        
+        response = HttpResponse(content_type='text/plain')
+        response.content = 'OK'
+        return response
+    else:
+        logger.warning('HTTP method not support, skip' % request.method)
+        return HttpResponseBadRequest('Bad Param Request')
