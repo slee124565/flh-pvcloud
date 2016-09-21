@@ -17,10 +17,11 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
 
-from pvs.views import pvs_report
+from pvs.views import pvs_report, pvs_dbconfig
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url(r'^pvs/report/$', csrf_exempt(pvs_report)),
+    url(r'^pvs/dbconfig/$', csrf_exempt(pvs_dbconfig)),
 ]
