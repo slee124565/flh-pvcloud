@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.core import signing
+from django.core.signing import BadSignature
 import json
 from datetime import datetime, timedelta
 
@@ -14,6 +15,88 @@ logger = logging.getLogger(__name__)
 PVS_SECRET_KEY = 'r^ek_^swu&o*_28a%gwn*1x5de8*o^kwhzl^yfv!1qu@6_sz_='
 
 # Create your views here.
+def pvs_meta_update_energy(pvs_energy):
+    '''
+    ::
+    
+        {
+            'version': 'v1',
+            'serial': 'xxxx',
+            'client_id': xxx,
+            'create_time': '<datetime>',
+            'pvi_name': 'xxx',
+            'modbus_id': xxx,
+            'value': xxxx,
+            'type': 'xxx',
+        }
+    '''
+    pass
+
+def pvs_meta_update_weather(pvs_weather):
+    '''
+    ::
+    
+        {
+            'version': 'v1',
+            'serial': 'xxx',
+            'create_time': '<datetime>',
+            'temperature': xxx,
+            'uv': xxx,
+            'visibility': xxx,
+        }
+    '''
+    pass
+
+def pvs_meta_update(request):
+    '''web api for pvs to update station information onto pvcloud
+    such as energy, weather and others with encrypted json data
+    by HTTP POST method
+    ::
+        {
+            'pvs_report' : <report_json>,
+            'pvs_energy': <energy_json>,
+            'pvs_weather' : <weather_json>,
+        }
+    '''
+    try:
+        signed_metadata = request.POST.get('pvs_meta', None)
+        if signed_metadata is None:
+            logger.warning('no pvs_meta param exist!')
+            return HttpResponseBadRequest('Bad Param Request')
+        
+        pvs_metadata = signing.loads(signed_metadata)
+        if 'pvs_report' in pvs_metadata.keys():
+            pvs_report_data_update_v2(pvs_metadata['pvs_report'])
+            
+        if 'pvs_energy' in pvs_metadata.keys():
+            pvs_meta_update_energy(pvs_metadata['pvs_energy'])
+            
+        if 'pvs_weather' in pvs_metadata.keys():
+            pvs_meta_update_weather(pvs_metadata['pvs_weather'])
+        
+    except BadSignature:
+        logger.warning('BadSignature pvs_metadata')
+        return HttpResponseBadRequest('Bad Param Request')
+    except:
+        logger.error('pvs_info http request error!', exc_info=True)
+        return HttpResponseServerError('Internal Server Error')
+
+def pvs_report_data_update_v2(pvs_info):
+    '''parse pvs report data and save into database by model Report
+    ::
+    
+        {
+            "version": "v2", 
+            "ip": "114.34.3.129",
+            "local_ip": "172.17.0.22", 
+            "hardware": "BCM2709", 
+            "serial": "00000000aa80e918", 
+            "revision": "a02082",
+            "dbconfig": <json_data>,
+        }
+    
+    '''
+    pass
 
 def pvs_report_data_update(pvs_info):
     '''parse pvs report data and save into database by model Report
