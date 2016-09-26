@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url(r'^pvs/report/$', csrf_exempt(pvs_report)),
+    url(r'^pvs/report/(?P<api_version>\w+)/$', csrf_exempt(pvs_report)),
     url(r'^pvs/dbconfig/$', csrf_exempt(pvs_dbconfig)),
     url(r'^pvs/info/$', csrf_exempt(pvs_meta_update)),
 ]

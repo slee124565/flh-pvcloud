@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
+from django.http.request import HttpRequest
 from django.core import signing
 from django.core.signing import BadSignature
 import json
@@ -98,19 +99,20 @@ def pvs_report_data_update_v2(pvs_info):
     '''
     pass
 
-def pvs_report_data_update(pvs_info):
+def pvs_report_data_update_v1(pvs_info):
     '''parse pvs report data and save into database by model Report
     ::
     
         {
           "ip": "114.34.3.129", 
+          "local_ip": "192.168.0.100", # v1.1 only
           "data": {
             "cpuinfo": {
               "hardware": "BCM2709", 
               "serial": "00000000aa80e918", 
               "revision": "a02082"
             }, 
-            "version": "v1", 
+            "version": "[v1|v1.1]", 
             "dbconfig": {
               "pvi": [
                 {
@@ -150,15 +152,26 @@ def pvs_report_data_update(pvs_info):
         if created:
             logger.info('new pvstation report event with serial: %s' % pvs_serial)
         entry.ip = pvs_info.get('ip')
+        if not pvs_info.get('local_ip',None) is None:
+            entry.local_ip = pvs_info.get('local_ip')
         entry.hardware = pvs_info.get('data',{}).get('cpuinfo',{}).get('hardware','')
         entry.revision = pvs_info.get('data',{}).get('cpuinfo',{}).get('revision','')
         entry.dbconfig = json.dumps(pvs_info.get('data',{}).get('dbconfig',{}))
         entry.last_update_time = datetime.now()
         entry.save()
         logger.info('pvs (%s) report saved' % pvs_serial)
+
+def pvs_report_data_update(pvs_info):
+    api_version = pvs_info.get('data',{}).get('version',None)
+    if api_version in ['v1', 'v1.1']:
+        pvs_report_data_update_v1(pvs_info)
+    else:
+        logger.warning('error version %s' % pvs_info.get('version',None))
+        return
     
-def pvs_report(request):
-    '''HTTP POST method for pvs to report it information for pvcloud'''
+def pvs_report_v1(request):
+    '''HTTP POST method for pvs to report it information for pvcloud
+    and pvcloud echo the pvs_info for pvs'''
 
     pvs_ip = get_real_ip(request)
     if pvs_ip == None:
@@ -184,6 +197,66 @@ def pvs_report(request):
     response = HttpResponse(content_type='text/plain')
     response.content = json.dumps(pvs_info,indent=2)   
     return response
+
+class PvsReportHandler_v1(HttpResponse):
+    http_request = None
+    pvs_report = None # pvs.models.Report class
+    
+    def __init__(self,http_request):
+        super(PvsReportHandler_v1,self).__init__(content_type='text/plain')
+        self.http_request = http_request
+        
+        pvs_encrypt_data = http_request.POST.get('data',None)
+        pvs_data = {}
+        if pvs_encrypt_data == None:
+            logger.warning('no pvs encrypt data exist!')
+            return HttpResponseBadRequest('Bad Param Request')
+        else:
+            pvs_data = signing.loads(pvs_encrypt_data,PVS_SECRET_KEY)
+            logger.debug('pvs report data with keys: %s' % str(self.pvs_data.keys()))
+        
+        pvs_data['public_ip'] = http_request.POST.get('pvs_public_ip','')
+        self.pvs_report = self.get_pvs_report_from_data(pvs_data)
+        if self.pvs_report is None:
+            return HttpResponseBadRequest('Bad Param Request')
+        self.pvs_report.save()
+        logger.info('pvs (%s) report saved' % self.pvs_report.serial)
+
+        self.content = json.dumps(self.pvs_data,indent=2)
+        
+    
+    def get_pvs_report_from_data(self,pvs_data):
+        pvs_serial = pvs_data.get('cpuinfo',{}).get('serial',None)
+        if pvs_serial is None:
+            logger.warning('no pi serial data exist, skip pvs_report process!')
+            return None
+        else: 
+            entry, created = Report.objects.get_or_create(serial=pvs_serial)
+            if created:
+                logger.info('new pvstation report event with serial: %s' % pvs_serial)
+            entry.ip = pvs_data.get('public_ip')
+            if not pvs_data.get('local_ip',None) is None:
+                entry.local_ip = pvs_data.get('local_ip')
+            entry.hardware = pvs_data.get('data',{}).get('cpuinfo',{}).get('hardware','')
+            entry.revision = pvs_data.get('data',{}).get('cpuinfo',{}).get('revision','')
+            entry.dbconfig = json.dumps(pvs_data.get('data',{}).get('dbconfig',{}))
+            entry.last_update_time = datetime.now()
+            return entry
+    
+def pvs_report(request,api_version='v1'):
+    try:
+        request.POST['pvs_public_ip'] = get_real_ip(request)
+
+        if api_version == 'v1':
+            return pvs_report_v1(request)
+        elif api_version == 'v1_1':
+            return PvsReportHandler_v1(request)
+        else:
+            logger.warning('Bad Param api_version %s Request' % api_version)
+            return HttpResponseBadRequest('Bad Param Request')
+    except:
+        logger.error('pvs_report web api error', exc_info=True)
+        return HttpResponseServerError('Server Internal Error')
     
 def pvs_dbconfig(request):
     '''implement web api for pvs self-update dbconfig query feature

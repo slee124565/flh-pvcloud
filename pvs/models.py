@@ -35,6 +35,14 @@ class Energy(models.Model):
         (TYPE_AC_OUTPUT_CURRENT, 'AC Output Current'),
         (TYPE_AC_OUTPUT_WATT, 'AC Output Watt'))
     
+    TYPE_MEASURE_INDEX_DC1 = 'dc1'
+    TYPE_MEASURE_INDEX_DC2 = 'dc2'
+    TYPE_MEASURE_INDEX_DC3 = 'dc3'
+    MEASURE_INDEX_CHOICES = (
+        (TYPE_MEASURE_INDEX_DC1,'dc1'),
+        (TYPE_MEASURE_INDEX_DC2,'dc2'),
+        (TYPE_MEASURE_INDEX_DC3,'dc3'),
+        )
     
     serial = models.CharField('pi serial', max_length=20)
     client_id = models.IntegerField('rowdata id in pvs',null=True)
@@ -43,6 +51,9 @@ class Energy(models.Model):
     modbus_id = models.IntegerField('modbus id the value from')
     value = models.IntegerField('pvi energy value')
     type = models.CharField('energy vaule type',max_length=20,choices=ENERGY_TYPE_CHOICES)
+    measure_index = models.CharField('pvi measure index',max_length=10,
+                                     choices=MEASURE_INDEX_CHOICES,null=True,
+                                     default=TYPE_MEASURE_INDEX_DC1)
     
 class Weather(models.Model):    
     serial = models.CharField('pi serial', max_length=20)
