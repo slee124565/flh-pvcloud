@@ -213,7 +213,7 @@ class PvsReportHandler_v1(HttpResponse):
             return HttpResponseBadRequest('Bad Param Request')
         else:
             pvs_data = signing.loads(pvs_encrypt_data,PVS_SECRET_KEY)
-            logger.debug('pvs report data with keys: %s' % str(self.pvs_data.keys()))
+            logger.debug('pvs report data with keys: %s' % str(pvs_data.keys()))
         
         pvs_data['public_ip'] = http_request.POST.get('pvs_public_ip','')
         self.pvs_report = self.get_pvs_report_from_data(pvs_data)
@@ -222,10 +222,11 @@ class PvsReportHandler_v1(HttpResponse):
         self.pvs_report.save()
         logger.info('pvs (%s) report saved' % self.pvs_report.serial)
 
-        self.content = json.dumps(self.pvs_data,indent=2)
+        self.content = json.dumps(pvs_data,indent=2)
         
     
     def get_pvs_report_from_data(self,pvs_data):
+        logger.debug('origin pvs_data: %s' % str(pvs_data))
         pvs_serial = pvs_data.get('cpuinfo',{}).get('serial',None)
         if pvs_serial is None:
             logger.warning('no pi serial data exist, skip pvs_report process!')
@@ -237,14 +238,15 @@ class PvsReportHandler_v1(HttpResponse):
             entry.ip = pvs_data.get('public_ip')
             if not pvs_data.get('local_ip',None) is None:
                 entry.local_ip = pvs_data.get('local_ip')
-            entry.hardware = pvs_data.get('data',{}).get('cpuinfo',{}).get('hardware','')
-            entry.revision = pvs_data.get('data',{}).get('cpuinfo',{}).get('revision','')
-            entry.dbconfig = json.dumps(pvs_data.get('data',{}).get('dbconfig',{}))
+            entry.hardware = pvs_data.get('cpuinfo',{}).get('hardware','')
+            entry.revision = pvs_data.get('cpuinfo',{}).get('revision','')
+            entry.dbconfig = json.dumps(pvs_data.get('dbconfig',{}))
             entry.last_update_time = datetime.now()
             return entry
     
 def pvs_report(request,api_version='v1'):
     try:
+        request.POST = request.POST.copy()
         request.POST['pvs_public_ip'] = get_real_ip(request)
 
         if api_version == 'v1':
