@@ -73,7 +73,6 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
     # Running on production App Engine, so use a Google Cloud SQL database.
     DATABASES = {
@@ -86,13 +85,22 @@ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
         }
     }
 else:
+    import socket
+    try:
+        HOSTNAME = socket.gethostname()
+    except:
+        HOSTNAME = 'localhost'
+    if HOSTNAME == 'pvcloud-compute-1':
+        DB_HOST = '104.199.200.37'
+    else:
+        DB_HOST = 'localhost'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'pvcloud',
             'USER': 'pvcloud',
             'PASSWORD': 'zaq12wsx',
-            'HOST': 'localhost',
+            'HOST': DB_HOST,
             'PORT': '3306',
         }
     }
