@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
 from mysite import sphinx_doc_view
 
-from pvs.views import pvs_report, pvs_dbconfig, pvs_meta_update
+from pvs.views import pvs_report, pvs_dbconfig
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -26,7 +26,6 @@ urlpatterns = [
     url(r'^pvs/report/$', csrf_exempt(pvs_report)),
     url(r'^pvs/report/(?P<api_version>\w+)/$', csrf_exempt(pvs_report)),
     url(r'^pvs/dbconfig/$', csrf_exempt(pvs_dbconfig)),
-    url(r'^pvs/info/$', csrf_exempt(pvs_meta_update)),
     
     url(r'^$', sphinx_doc_view),
     

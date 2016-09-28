@@ -194,12 +194,12 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
             logger.debug('entry.create_time: %s' % entry.create_time)
             entry.pvi_name = regdata.get('pvi_name')
             entry.modbus_id = int(regdata.get('modbus_id'))
-            entry.value = int(regdata.get('pvi_name'))
+            entry.value = int(regdata.get('value'))
             entry.measurement_index = regdata.get('measurement_index')
             entry.save()
             logger.info('pvs energy data (serial: %s, data_id: %s) saved' % (
                                                                     self.pvs_serial, data_id))
-        logger.info('pvs energy data %s created and $s updated' % (count_create,count_update))
+        logger.info('pvs energy data %s created and %s updated' % (count_create,count_update))
             
 def pvs_report(request,api_version='v1'):
     try:
