@@ -194,7 +194,7 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
             else:
                 entry,created = Energy.objects.get_or_create(serial = self.pvs_serial,
                                                      data_id = data_id)
-                if created:
+                if not created:
                     count_update += 1
                     logger.warning('pvs energy data (serial: %s, data_id: %s) already exist, replace it' % (
                                                                         self.pvs_serial, data_id))
