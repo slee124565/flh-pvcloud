@@ -45,13 +45,13 @@ class Energy(models.Model):
         )
     
     serial = models.CharField('pi serial', max_length=20)
-    client_id = models.IntegerField('rowdata id in pvs',null=True)
+    data_id = models.IntegerField('rowdata id in pvs',null=True)
     create_time = models.DateTimeField('pvi energy read time')
     pvi_name = models.CharField('pvi name in pvs', max_length=50, null=True)
     modbus_id = models.IntegerField('modbus id the value from')
     value = models.IntegerField('pvi energy value')
-    type = models.CharField('energy vaule type',max_length=20,choices=ENERGY_TYPE_CHOICES)
-    measure_index = models.CharField('pvi measure index',max_length=10,
+    type = models.CharField('energy value type',max_length=20,choices=ENERGY_TYPE_CHOICES)
+    measurement_index = models.CharField('pvi measurement index',max_length=10,
                                      choices=MEASURE_INDEX_CHOICES,null=True,
                                      default=TYPE_MEASURE_INDEX_DC1)
     

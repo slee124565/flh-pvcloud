@@ -8,96 +8,12 @@ from datetime import datetime, timedelta
 
 from ipware.ip import get_real_ip
 
-from .models import Report, DbConfig
+from .models import Report, DbConfig, Energy
 
 import logging
 logger = logging.getLogger(__name__)
 
 PVS_SECRET_KEY = 'r^ek_^swu&o*_28a%gwn*1x5de8*o^kwhzl^yfv!1qu@6_sz_='
-
-# Create your views here.
-def pvs_meta_update_energy(pvs_energy):
-    '''
-    ::
-    
-        {
-            'version': 'v1',
-            'serial': 'xxxx',
-            'client_id': xxx,
-            'create_time': '<datetime>',
-            'pvi_name': 'xxx',
-            'modbus_id': xxx,
-            'value': xxxx,
-            'type': 'xxx',
-        }
-    '''
-    pass
-
-def pvs_meta_update_weather(pvs_weather):
-    '''
-    ::
-    
-        {
-            'version': 'v1',
-            'serial': 'xxx',
-            'create_time': '<datetime>',
-            'temperature': xxx,
-            'uv': xxx,
-            'visibility': xxx,
-        }
-    '''
-    pass
-
-def pvs_meta_update(request):
-    '''web api for pvs to update station information onto pvcloud
-    such as energy, weather and others with encrypted json data
-    by HTTP POST method
-    ::
-        {
-            'pvs_report' : <report_json>,
-            'pvs_energy': <energy_json>,
-            'pvs_weather' : <weather_json>,
-        }
-    '''
-    try:
-        signed_metadata = request.POST.get('pvs_meta', None)
-        if signed_metadata is None:
-            logger.warning('no pvs_meta param exist!')
-            return HttpResponseBadRequest('Bad Param Request')
-        
-        pvs_metadata = signing.loads(signed_metadata)
-        if 'pvs_report' in pvs_metadata.keys():
-            pvs_report_data_update_v2(pvs_metadata['pvs_report'])
-            
-        if 'pvs_energy' in pvs_metadata.keys():
-            pvs_meta_update_energy(pvs_metadata['pvs_energy'])
-            
-        if 'pvs_weather' in pvs_metadata.keys():
-            pvs_meta_update_weather(pvs_metadata['pvs_weather'])
-        
-    except BadSignature:
-        logger.warning('BadSignature pvs_metadata')
-        return HttpResponseBadRequest('Bad Param Request')
-    except:
-        logger.error('pvs_info http request error!', exc_info=True)
-        return HttpResponseServerError('Internal Server Error')
-
-def pvs_report_data_update_v2(pvs_info):
-    '''parse pvs report data and save into database by model Report
-    ::
-    
-        {
-            "version": "v2", 
-            "ip": "114.34.3.129",
-            "local_ip": "172.17.0.22", 
-            "hardware": "BCM2709", 
-            "serial": "00000000aa80e918", 
-            "revision": "a02082",
-            "dbconfig": <json_data>,
-        }
-    
-    '''
-    pass
 
 def pvs_report_data_update_v1(pvs_info):
     '''parse pvs report data and save into database by model Report
@@ -200,7 +116,9 @@ def pvs_report_v1(request):
 
 class PvsReportHandler_v1(HttpResponse):
     http_request = None
-    pvs_report = None # pvs.models.Report class
+    pvs_serial = None       # pvs pi serial
+    pvs_data = None         # decrypted json data from pvstation
+    pvs_report = None       # pvs.models.Report class
     
     def __init__(self,http_request):
         super(PvsReportHandler_v1,self).__init__(content_type='text/plain')
@@ -214,6 +132,7 @@ class PvsReportHandler_v1(HttpResponse):
         else:
             pvs_data = signing.loads(pvs_encrypt_data,PVS_SECRET_KEY)
             logger.debug('pvs report data with keys: %s' % str(pvs_data.keys()))
+            self.pvs_data = pvs_data
         
         pvs_data['public_ip'] = http_request.POST.get('pvs_public_ip','')
         self.pvs_report = self.get_pvs_report_from_data(pvs_data)
@@ -223,8 +142,7 @@ class PvsReportHandler_v1(HttpResponse):
         logger.info('pvs (%s) report saved' % self.pvs_report.serial)
 
         self.content = json.dumps(pvs_data,indent=2)
-        
-    
+            
     def get_pvs_report_from_data(self,pvs_data):
         logger.debug('origin pvs_data: %s' % str(pvs_data))
         pvs_serial = pvs_data.get('cpuinfo',{}).get('serial',None)
@@ -232,6 +150,7 @@ class PvsReportHandler_v1(HttpResponse):
             logger.warning('no pi serial data exist, skip pvs_report process!')
             return None
         else: 
+            self.pvs_serial = pvs_serial
             entry, created = Report.objects.get_or_create(serial=pvs_serial)
             if created:
                 logger.info('new pvstation report event with serial: %s' % pvs_serial)
@@ -243,7 +162,43 @@ class PvsReportHandler_v1(HttpResponse):
             entry.dbconfig = json.dumps(pvs_data.get('dbconfig',{}))
             entry.last_update_time = datetime.now()
             return entry
+
+class PvsReportHandler_v1_2(PvsReportHandler_v1):
+    pvs_energy_data = None  # pvs energy data list, 
     
+    def __init__(self,http_request):
+        super(PvsReportHandler_v1_2,self).__init__(http_request)
+        self.create_or_update_pvs_energy_data()
+        
+    def create_or_update_pvs_energy_data(self):
+        pvs_energy_data = self.pvs_data.get('energy',None)
+        if pvs_energy_data is None:
+            logger.warning('no energy data in pvs_data error!')
+            return HttpResponseBadRequest('Bad Param Request')
+        self.pvs_energy_data = pvs_energy_data
+        count_create = 0
+        count_update = 0
+        for regdata in pvs_energy_data:
+            data_id = regdata.get('data_id',None)
+            entry, created = Energy.objects.get_or_create(serial = self.pvs_serial,
+                                                 data_id = data_id)
+            
+            if not created:
+                count_update += 1
+                logger.warning('pvs energy data (serial: %s, data_id: %s) already exist, replace it' % (
+                                                                    self.pvs_serial, data_id))
+            else:
+                count_create += 1
+            entry.create_time = datetime.strptime(regdata.get('create_time'))
+            entry.pvi_name = regdata.get('pvi_name')
+            entry.modbus_id = int(regdata.get('modbus_id'))
+            entry.value = int(regdata.get('pvi_name'))
+            entry.measurement_index = regdata.get('measurement_index')
+            entry.save()
+            logger.info('pvs energy data (serial: %s, data_id: %s) saved' % (
+                                                                    self.pvs_serial, data_id))
+        logger.info('pvs energy data %s created and $s updated' % (count_create,count_update))
+            
 def pvs_report(request,api_version='v1'):
     try:
         request.POST = request.POST.copy()
@@ -253,6 +208,8 @@ def pvs_report(request,api_version='v1'):
             return pvs_report_v1(request)
         elif api_version == 'v1_1':
             return PvsReportHandler_v1(request)
+        elif api_version == 'v1_2':
+            return PvsReportHandler_v1_2(request)
         else:
             logger.warning('Bad Param api_version %s Request' % api_version)
             return HttpResponseBadRequest('Bad Param Request')
