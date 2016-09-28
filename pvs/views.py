@@ -209,7 +209,7 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
                 entry.save()
                 logger.info('pvs energy data (serial: %s, data_id: %s) saved' % (
                                                                     self.pvs_serial, data_id))
-        logger.info('pvs energy data %s created, $s updated and %s skipped' % (count_create,
+        logger.info('pvs energy data %s created, %s updated and %s skipped' % (count_create,
                                                                                count_update,
                                                                                count_skip))
             
