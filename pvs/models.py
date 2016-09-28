@@ -25,20 +25,22 @@ class Energy(models.Model):
     
     TYPE_ENERGY_DC_LIFE = 'en_dc_life'
     TYPE_ENERGY_TODAY = 'en_today'
-    TYPE_AC_OUTPUT_VOLTAGE = 'ac_v'
-    TYPE_AC_OUTPUT_CURRENT = 'ac_c'
-    TYPE_AC_OUTPUT_WATT = 'ac_w'
+    TYPE_VOLTAGE = 'voltage'
+    TYPE_CURRENT = 'current'
+    TYPE_WATTAGE = 'wattage'
     ENERGY_TYPE_CHOICES = (
         (TYPE_ENERGY_DC_LIFE,'Energy Output DC Life'),
         (TYPE_ENERGY_TODAY, 'Energy Output Today'),
-        (TYPE_AC_OUTPUT_VOLTAGE, 'AC Output Voltage'),
-        (TYPE_AC_OUTPUT_CURRENT, 'AC Output Current'),
-        (TYPE_AC_OUTPUT_WATT, 'AC Output Watt'))
+        (TYPE_VOLTAGE, 'Voltage'),
+        (TYPE_CURRENT, 'Current'),
+        (TYPE_WATTAGE, 'Wattage'))
     
+    TYPE_MEASURE_INDEX_GRID = 'grid'
     TYPE_MEASURE_INDEX_DC1 = 'dc1'
     TYPE_MEASURE_INDEX_DC2 = 'dc2'
     TYPE_MEASURE_INDEX_DC3 = 'dc3'
     MEASURE_INDEX_CHOICES = (
+        (TYPE_MEASURE_INDEX_DC1,'grid'),
         (TYPE_MEASURE_INDEX_DC1,'dc1'),
         (TYPE_MEASURE_INDEX_DC2,'dc2'),
         (TYPE_MEASURE_INDEX_DC3,'dc3'),
