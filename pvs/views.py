@@ -144,7 +144,7 @@ class PvsReportHandler_v1(HttpResponse):
         self.content = json.dumps(pvs_data,indent=2)
             
     def get_pvs_report_from_data(self,pvs_data):
-        logger.debug('origin pvs_data: %s' % str(pvs_data))
+        #logger.debug('origin pvs_data: %s' % str(pvs_data))
         pvs_serial = pvs_data.get('cpuinfo',{}).get('serial',None)
         if pvs_serial is None:
             logger.warning('no pi serial data exist, skip pvs_report process!')
@@ -185,21 +185,18 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
         count_skip = 0
         data_type_filter = PvsReportHandler_v1_2.get_data_type_filter_list()
         for regdata in pvs_energy_data:
-            logger.debug('pvs regdata:\n%s' % json.dumps(regdata,indent=2))
+            #logger.debug('pvs regdata:\n%s' % json.dumps(regdata,indent=2))
             data_id = regdata.get('data_id',None)
             data_type = regdata.get('data_type')
             if not data_type in data_type_filter:
-                logger.info('reg data type %s not in filter list, skip' % data_type)
+                logger.info('pvs energy data (serial: %s, data_id: %s, data_type: %s) skip' % (
+                                                                    self.pvs_serial, 
+                                                                    data_id,
+                                                                    data_type))
                 count_skip += 1
             else:
                 entry,created = Energy.objects.get_or_create(serial = self.pvs_serial,
                                                      data_id = data_id)
-                if not created:
-                    count_update += 1
-                    logger.warning('pvs energy data (serial: %s, data_id: %s) already exist, replace it' % (
-                                                                        self.pvs_serial, data_id))
-                else:
-                    count_create += 1
                 entry.create_time = datetime.strptime(regdata.get('create_time'),'%Y-%m-%d %H:%M:%S')
                 entry.pvi_name = regdata.get('pvi_name')
                 entry.modbus_id = int(regdata.get('modbus_id'))
@@ -207,8 +204,18 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
                 entry.type = regdata.get('data_type')
                 entry.measurement_index = regdata.get('measurement_index')
                 entry.save()
-                logger.info('pvs energy data (serial: %s, data_id: %s) saved' % (
-                                                                    self.pvs_serial, data_id))
+                if not created:
+                    count_update += 1
+                    logger.info('pvs energy data (serial: %s, data_id: %s, data_type: %s) updated' % (
+                                                                        self.pvs_serial, 
+                                                                        data_id,
+                                                                        data_type))
+                else:
+                    count_create += 1
+                    logger.info('pvs energy data (serial: %s, data_id: %s, data_type: %s) saved' % (
+                                                                        self.pvs_serial, 
+                                                                        data_id,
+                                                                        data_type))
         logger.info('pvs energy data %s created, %s updated and %s skipped' % (count_create,
                                                                                count_update,
                                                                                count_skip))
