@@ -169,7 +169,11 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
     def __init__(self,http_request):
         super(PvsReportHandler_v1_2,self).__init__(http_request)
         self.create_or_update_pvs_energy_data()
-        
+    
+    @classmethod
+    def get_data_type_filter_list(cls):
+        return [entry[0] for entry in Energy.ENERGY_TYPE_CHOICES]
+            
     def create_or_update_pvs_energy_data(self):
         pvs_energy_data = self.pvs_data.get('energy',None)
         if pvs_energy_data is None:
@@ -178,28 +182,36 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
         self.pvs_energy_data = pvs_energy_data
         count_create = 0
         count_update = 0
+        count_skip = 0
+        data_type_filter = PvsReportHandler_v1_2.get_data_type_filter_list()
         for regdata in pvs_energy_data:
             logger.debug('pvs regdata:\n%s' % json.dumps(regdata,indent=2))
             data_id = regdata.get('data_id',None)
-            entry,created = Energy.objects.get_or_create(serial = self.pvs_serial,
-                                                 data_id = data_id)
-            
-            if created:
-                count_update += 1
-                logger.warning('pvs energy data (serial: %s, data_id: %s) already exist, replace it' % (
-                                                                    self.pvs_serial, data_id))
+            data_type = regdata.get('data_type')
+            if not data_type in data_type_filter:
+                logger.info('reg data type %s not in filter list, skip' % data_type)
+                count_skip += 1
             else:
-                count_create += 1
-            entry.create_time = datetime.strptime(regdata.get('create_time'),'%Y-%m-%d %H:%M:%S')
-            logger.debug('entry.create_time: %s' % entry.create_time)
-            entry.pvi_name = regdata.get('pvi_name')
-            entry.modbus_id = int(regdata.get('modbus_id'))
-            entry.value = int(regdata.get('value'))
-            entry.measurement_index = regdata.get('measurement_index')
-            entry.save()
-            logger.info('pvs energy data (serial: %s, data_id: %s) saved' % (
+                entry,created = Energy.objects.get_or_create(serial = self.pvs_serial,
+                                                     data_id = data_id)
+                if created:
+                    count_update += 1
+                    logger.warning('pvs energy data (serial: %s, data_id: %s) already exist, replace it' % (
+                                                                        self.pvs_serial, data_id))
+                else:
+                    count_create += 1
+                entry.create_time = datetime.strptime(regdata.get('create_time'),'%Y-%m-%d %H:%M:%S')
+                entry.pvi_name = regdata.get('pvi_name')
+                entry.modbus_id = int(regdata.get('modbus_id'))
+                entry.value = int(regdata.get('value'))
+                entry.type = regdata.get('data_type')
+                entry.measurement_index = regdata.get('measurement_index')
+                entry.save()
+                logger.info('pvs energy data (serial: %s, data_id: %s) saved' % (
                                                                     self.pvs_serial, data_id))
-        logger.info('pvs energy data %s created and %s updated' % (count_create,count_update))
+        logger.info('pvs energy data %s created, $s updated and %s skipped' % (count_create,
+                                                                               count_update,
+                                                                               count_skip))
             
 def pvs_report(request,api_version='v1'):
     try:
