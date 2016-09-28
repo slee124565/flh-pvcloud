@@ -179,6 +179,7 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
         count_create = 0
         count_update = 0
         for regdata in pvs_energy_data:
+            logger.debug('pvs regdata:\n%s' % json.dumps(regdata,indent=2))
             data_id = regdata.get('data_id',None)
             entry, created = Energy.objects.get_or_create(serial = self.pvs_serial,
                                                  data_id = data_id)
@@ -189,7 +190,8 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
                                                                     self.pvs_serial, data_id))
             else:
                 count_create += 1
-            entry.create_time = datetime.strptime(regdata.get('create_time'))
+            entry.create_time = datetime.strptime(regdata.get('create_time'),'%Y-%m-%d %H:%M:%S')
+            logger.debug('entry.create_time: %s' % entry.create_time)
             entry.pvi_name = regdata.get('pvi_name')
             entry.modbus_id = int(regdata.get('modbus_id'))
             entry.value = int(regdata.get('pvi_name'))
