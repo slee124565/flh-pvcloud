@@ -181,14 +181,16 @@ class PvsReportHandler_v1_2(PvsReportHandler_v1):
         for regdata in pvs_energy_data:
             logger.debug('pvs regdata:\n%s' % json.dumps(regdata,indent=2))
             data_id = regdata.get('data_id',None)
-            entry, created = Energy.objects.get_or_create(serial = self.pvs_serial,
+            entry = Energy.objects.get(serial = self.pvs_serial,
                                                  data_id = data_id)
             
-            if not created:
+            if entry:
                 count_update += 1
                 logger.warning('pvs energy data (serial: %s, data_id: %s) already exist, replace it' % (
                                                                     self.pvs_serial, data_id))
             else:
+                entry = Energy.objects.create(serial = self.pvs_serial,
+                                                 data_id = data_id)
                 count_create += 1
             entry.create_time = datetime.strptime(regdata.get('create_time'),'%Y-%m-%d %H:%M:%S')
             logger.debug('entry.create_time: %s' % entry.create_time)
