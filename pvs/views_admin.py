@@ -1,6 +1,9 @@
 from django.http import HttpResponse
-from .models import *
+from django.db.models import Count
 
+from .models import Report, Energy
+
+from datetime import datetime
 import json
 
 class PvsManager:
@@ -24,26 +27,46 @@ class PvsManager:
         ex:
             {
                 'date' : 'YYYY-mm-dd',
-                'pvs' : [
-                    {
-                        'serial': 'xxxx',
-                        'pvi': [
-                            {
-                                'modbus_id': xxx,
-                                'energy': {
-                                    'current': {
-                                        'count': xxx,
-                                        'not_zero': xxx
+                'pvs' : {
+                    '<serial>':
+                        {
+                            'serial': 'xxxx',
+                            'pvi': {
+                                <modbus_id>:
+                                    {
+                                        'modbus_id': xxx,
+                                        'energy': {
+                                            'current': {
+                                                'count': xxx,
+                                                'not_zero': xxx
+                                            }
+                                        }
                                     }
-                                }
                             }, ...
-                        ]
-                    }, ...
-                ]
+                        }
+                }, ...
             }
         '''
-        energy_report = {}
-        #TODO:
+        energy_report = {
+            'date': datetime.today().date().strftime('%Y-%m-%d'),
+            'pvs': {}
+            }
+
+        queryset = Energy.objects.filter(create_time__gt=datetime.today().date()
+                                ).filter(value__gt=0
+                                ).values('serial','modbus_id','type'
+                                ).annotate(count=Count(type))
+        for entry in queryset:
+            serial = entry.get('serial')
+            pvs_report = energy_report.get('pvs').get(serial,{})
+            pvs_report[serial]['serial'] = entry.get('serial')
+            modbus_id = entry.get('modbus_id')
+            pvi_report = pvs_report.get(modbus_id,{})
+            pvi_report[modbus_id]['modbus_id'] = modbus_id
+            pvi_energy = pvi_report[modbus_id].get('energy',{})
+            energy_type = entry.get('type')
+            pvi_energy = pvi_energy.get(energy_type,{})
+            pvi_energy[energy_type]['non_zero_count'] = entry.get('count')
         return energy_report
     
 class ConsoleHttpResponse(HttpResponse):
