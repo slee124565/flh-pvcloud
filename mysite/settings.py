@@ -150,6 +150,9 @@ STATIC_ROOT = os.path.join(BASE_DIR,'static/')
 STATICFILES_DIRS = [
                     #os.path.join(BASE_DIR,"static"),
                     ("doc", os.path.join(BASE_DIR,"doc","_build","html")),
+                    ("styles", os.path.join(BASE_DIR,"webapp","dist","styles")),
+                    ("scripts", os.path.join(BASE_DIR,"webapp","dist","scripts")),
+                    ("fonts", os.path.join(BASE_DIR,"webapp","dist","fonts")),
                     ]
 
 LOGGING = {
