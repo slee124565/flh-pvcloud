@@ -13,8 +13,9 @@ class PvsManager:
         '''
         serial_list = [{'address': json.loads(entry.dbconfig).get('accuweather').get('address'),
                         'serial': entry.serial,
-                        'local ip': entry.local_ip,
-                        'public ip': entry.ip} for entry in Report.objects.all()]
+                        'data': {
+                            'local ip': entry.local_ip,
+                            'public ip': entry.ip}} for entry in Report.objects.all()]
         return serial_list
     
     @classmethod
@@ -54,11 +55,14 @@ class ConsoleHttpResponse(HttpResponse):
         serial_list = PvsManager.get_serial_list()
         energy_data = PvsManager.get_today_energy_report()
         
-        self.content = ''
+        content = u''
         for entry in serial_list:
-            self.content += entry.get('address') + '\r\n' + json.dumps(entry,indent=4)
-            
-        self.content += json.dumps(energy_data,indent=4)
+            content += u''.join((entry.get('serial'),u' ',entry.get('address'),u'<br/>',
+                            json.dumps(entry.get('data'),indent=4),u'<br/><br/>'))
+       
+        content += json.dumps(energy_data,indent=4)
+
+        self.content = content
         
 def admin_view(request):
-    return ConsoleHttpResponse()
+    return ConsoleHttpResponse(request)
