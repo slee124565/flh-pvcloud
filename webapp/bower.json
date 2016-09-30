@@ -1,0 +1,21 @@
+{
+  "name": "pvcloud_dashboard",
+  "homepage": "index.html",
+  "authors": [
+    "Lee Shiueh <lee.shiueh@gmail.com>"
+  ],
+  "description": "PVCloud Server Dashboard Web App",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.6.3"
+  }
+}
