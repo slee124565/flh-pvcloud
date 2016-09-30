@@ -57,12 +57,17 @@ class PvsManager:
                                 ).values('serial','modbus_id','type'
                                 ).annotate(count=Count(type))
         for entry in queryset:
+            pvs_data = energy_report.get('pvs',{})
+            energy_report['pvs'] = pvs_data
+            
             serial = entry.get('serial')
-            pvs_report = energy_report.get('pvs').get(serial,{})
+            pvs_report = pvs_data.get(serial,{})
             pvs_report[serial]['serial'] = entry.get('serial')
+
             modbus_id = entry.get('modbus_id')
             pvi_report = pvs_report.get(modbus_id,{})
             pvi_report[modbus_id]['modbus_id'] = modbus_id
+            
             pvi_energy = pvi_report[modbus_id].get('energy',{})
             energy_type = entry.get('type')
             pvi_energy = pvi_energy.get(energy_type,{})
@@ -83,7 +88,7 @@ class ConsoleHttpResponse(HttpResponse):
             content += u''.join((entry.get('serial'),u' ',entry.get('address'),u'<br/>',
                             json.dumps(entry.get('data'),indent=4),u'<br/><br/>'))
        
-        content += json.dumps(energy_data,indent=4)
+        content += json.dumps(energy_data,indent=4).replace(u'\n',u'<br/>')
 
         self.content = content
         
