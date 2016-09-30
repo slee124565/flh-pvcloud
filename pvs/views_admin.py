@@ -62,33 +62,39 @@ class PvsManager:
             
             serial = entry.get('serial')
             pvs_report = pvs_data.get(serial,{})
-            pvs_report[serial]['serial'] = entry.get('serial')
+            pvs_data[serial] = pvs_report
+            
+            pvs_report['serial'] = serial
+            pvi_data = pvs_report.get('pvi',{})
+            pvs_report['pvi'] = pvi_data
 
             modbus_id = entry.get('modbus_id')
-            pvi_report = pvs_report.get(modbus_id,{})
-            pvi_report[modbus_id]['modbus_id'] = modbus_id
+            pvi_report = pvi_data.get(modbus_id,{})
+            pvi_data[modbus_id] = pvi_report
+            pvi_report['modbus_id'] = modbus_id
             
-            pvi_energy = pvi_report[modbus_id].get('energy',{})
+            pvi_energy = pvi_report.get('energy',{})
+            pvi_report['energy'] = pvi_energy
             energy_type = entry.get('type')
-            pvi_energy = pvi_energy.get(energy_type,{})
-            pvi_energy[energy_type]['non_zero_count'] = entry.get('count')
+            energy = pvi_energy.get(energy_type,{})
+            pvi_energy[energy_type] = energy
+            energy['non_zero_count'] = entry.get('count')
         return energy_report
     
 class ConsoleHttpResponse(HttpResponse):
     
     def __init__(self,request):
-        super(ConsoleHttpResponse,self).__init__()
-        self.content_type = 'plain/text'
+        super(ConsoleHttpResponse,self).__init__(content_type='text/plain')
         
         serial_list = PvsManager.get_serial_list()
         energy_data = PvsManager.get_today_energy_report()
         
         content = u''
         for entry in serial_list:
-            content += u''.join((entry.get('serial'),u' ',entry.get('address'),u'<br/>',
-                            json.dumps(entry.get('data'),indent=4),u'<br/><br/>'))
+            content += u''.join((entry.get('serial'),u' ',entry.get('address'),u'\n',
+                            json.dumps(entry.get('data'),indent=4),u'\n\n'))
        
-        content += json.dumps(energy_data,indent=4).replace(u'\n',u'<br/>')
+        content += json.dumps(energy_data,indent=4)
 
         self.content = content
         
