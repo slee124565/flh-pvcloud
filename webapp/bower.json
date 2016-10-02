@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "bootstrap": "^3.3.7",
-    "font-awesome": "^4.6.3"
+    "font-awesome": "^4.6.3",
+    "amcharts": "^3.15.2"
   }
 }
