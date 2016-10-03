@@ -154,6 +154,7 @@ STATICFILES_DIRS = [
                     ("fonts", os.path.join(BASE_DIR,"webapp","app","fonts")),
                     ("js", os.path.join(BASE_DIR,"webapp","app","js")),
                     ("css", os.path.join(BASE_DIR,"webapp","app","css")),
+                    ("amcharts", os.path.join(BASE_DIR,"webapp","bower_components","amcharts","dist","amcharts")),
                     #("styles", os.path.join(BASE_DIR,"webapp","dist","styles")),
                     #("scripts", os.path.join(BASE_DIR,"webapp","dist","scripts")),
                     #("fonts", os.path.join(BASE_DIR,"webapp","dist","fonts")),
