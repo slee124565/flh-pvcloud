@@ -11,6 +11,18 @@ class UserPVStationView(TemplateView):
     ENERGY_DATA_TYPE_TOTAL = 1
     ENERGY_DATA_TYPE_STACKED = 2
     
+    def prepare_pvs_energy_hourly_output_data(self, pvs_serial):
+        
+        pvs_en_hourly_data = Energy.get_calculated_energy_hourly_output(pvs_serial)[pvs_serial]
+        p_date_list = [p_date for p_date in pvs_en_hourly_data]
+        p_date_list.sort()
+        
+        p_data = []
+        for p_date in p_date_list:
+            p_data.append(pvs_en_hourly_data[p_date])
+        
+        return p_data
+        
     def prepare_pvs_energy_daily_output_data(self,pvs_serial,en_daily_data_type=ENERGY_DATA_TYPE_TOTAL):
         
         pvs_en_daily_data = Energy.get_energy_daily_output(pvs_serial)[pvs_serial]
@@ -37,8 +49,12 @@ class UserPVStationView(TemplateView):
         pvs_serial = self.kwargs.get('pvs_serial')
         if pvs_serial in Energy.get_distinct_serial():
             context['pvs_serial'] = self.kwargs.get('pvs_serial')
+            
             pvs_en_daily = self.prepare_pvs_energy_daily_output_data(pvs_serial,self.ENERGY_DATA_TYPE_STACKED)
             context['pvs_data_en_daily'] = json.dumps(pvs_en_daily)
+            
+            pvs_en_hourly = self.prepare_pvs_energy_hourly_output_data(pvs_serial)
+            context['pvs_data_en_hourly'] = json.dumps(pvs_en_hourly)
         return context
     
     
