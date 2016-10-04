@@ -165,7 +165,7 @@ class Energy(models.Model):
                 en_day = {}
                 energy_list[entry.get('serial')][en_day_str] = en_day
                 en_day['date'] = en_day_str
-            en_day[entry.get('modbus_id')] = entry.get('max_value')
+            en_day[entry.get('modbus_id')] = entry.get('max_value') * 10
             
         return energy_list
     
@@ -217,7 +217,7 @@ class Energy(models.Model):
                 en_day = {}
                 en_daily_list[entry.get('serial')][str(entry.get('en_date'))] = en_day
                 en_day['date'] = en_day_str
-            en_day[entry.get('modbus_id')] = entry.get('max_value')
+            en_day[entry.get('modbus_id')] = entry.get('max_value') * 10
             
         return en_daily_list
     

@@ -115,10 +115,12 @@
     </div>
     <!-- /.container -->
 
+	{% autoescape off %}
     <script>
-    	var pvs_data_en_hourly = {{ pvs_data_en_hourly }};
+    	//var pvs_data_en_hourly = {{ pvs_data_en_hourly }};
     	var pvs_data_en_daily = {{ pvs_data_en_daily }};
     </script>
+    {% endautoescape %}
 
     <!-- build:js scripts/main.js -->
     <!-- jQuery -->
@@ -130,6 +132,7 @@
     <!-- amCharts -->
     <script src="{% static "amcharts/amcharts.js" %}"></script>
     <script src="{% static "amcharts/serial.js" %}"></script>
+    <script src="{% static "js/sample_data.js" %}"></script>
     <script src="{% static "js/pvstation.js" %}"></script>
     <!-- endbuild -->
 
