@@ -1,7 +1,8 @@
 from django.views.generic import TemplateView
 
-from pvs.models import Energy
+from pvs.models import Energy, Report
 
+from datetime import date
 import json
 
 class UserPVStationView(TemplateView):
@@ -55,6 +56,11 @@ class UserPVStationView(TemplateView):
             
             pvs_en_hourly = self.prepare_pvs_energy_hourly_output_data(pvs_serial)
             context['pvs_data_en_hourly'] = json.dumps(pvs_en_hourly)
+            
+            context['pvs_address'] = u''.join(Report.get_address(pvs_serial)).encode('utf-8')
+            
+            context['copyright_year'] = date.today().year
+            
         return context
     
     

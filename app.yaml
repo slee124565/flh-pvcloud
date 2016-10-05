@@ -26,6 +26,16 @@ handlers:
   static_dir: static/
 - url: .*
   script: mysite.wsgi.application
+  
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^webapp/bower_components$
+- ^webapp/dist$
+- ^webapp/node_modules$  
 
 # Only pure Python libraries can be vendored
 # Python libraries that use C extensions can

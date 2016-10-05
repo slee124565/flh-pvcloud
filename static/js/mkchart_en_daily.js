@@ -28,7 +28,7 @@ var chart_daily_stacked = AmCharts.makeChart("pvs_chart_en_daily", {
 		"axisAlpha": 0,
 		"gridAlpha":0,
 		"position": "left",
-		"title": "Energy(Wh)",
+		"title": "Daily Energy(Wh)",
 		"stackType": "regular", 
 		},
 	    /*{

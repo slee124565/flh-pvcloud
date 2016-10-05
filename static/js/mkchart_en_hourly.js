@@ -26,7 +26,7 @@ var chart_hourly = AmCharts.makeChart("pvs_chart_en_hourly", {
 	  "axisAlpha": 0,
 	  "gridAlpha":0,
 	  "position": "left",
-	  "title": "Energy(Wh)",
+	  "title": "Hourly Energy(Wh)",
 	  "stackType": "regular", 
      },
     /*{

@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Count, Max
 from datetime import datetime, timedelta
 
+import json
 import logging
 logger = logging.getLogger(__name__)
 # Create your models here.
@@ -16,6 +17,16 @@ class Report(models.Model):
     serial = models.CharField('pi serial', max_length=20,default='')
     dbconfig = models.TextField('pvs dbconfig', default='{}')
     last_update_time = models.DateTimeField('last update time',default=datetime.now)
+    
+    @classmethod
+    def get_address(cls, pvs_serial):
+        queryset = cls.objects.filter(serial=pvs_serial).order_by('-last_update_time')
+        if len(queryset) > 0:
+            entry = queryset[0]
+            dbconfig = json.loads(entry.dbconfig)
+            return dbconfig.get('accuweather').get('address')
+        else:
+            return pvs_serial
 
 class DbConfig(models.Model):
     serial = models.CharField('pi serial', max_length=20)
