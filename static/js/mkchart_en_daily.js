@@ -100,5 +100,6 @@ var chart_daily_stacked = AmCharts.makeChart("pvs_chart_en_daily", {
 	  },
 	  "export": {
 	    "enabled": true
-	  }
+	  },
+	  "panEventsEnabled": false,
 	});
