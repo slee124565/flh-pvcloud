@@ -23,7 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '%*03qgpl^b)gxyle&gwj0_2*nk9e0tl38lsch31uy0c_a7yitl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+    DEBUG = False
+else:
+    DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -55,7 +58,9 @@ ROOT_URLCONF = 'mysite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+                os.path.join(BASE_DIR,'webapp','app')
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -90,6 +95,7 @@ else:
         HOSTNAME = socket.gethostname()
     except:
         HOSTNAME = 'localhost'
+    
     if HOSTNAME == 'pvcloud-compute-1':
         DB_HOST = '104.199.200.37'
     else:
@@ -148,6 +154,13 @@ STATIC_ROOT = os.path.join(BASE_DIR,'static/')
 STATICFILES_DIRS = [
                     #os.path.join(BASE_DIR,"static"),
                     ("doc", os.path.join(BASE_DIR,"doc","_build","html")),
+                    ("fonts", os.path.join(BASE_DIR,"webapp","app","fonts")),
+                    ("js", os.path.join(BASE_DIR,"webapp","app","js")),
+                    ("css", os.path.join(BASE_DIR,"webapp","app","css")),
+                    ("amcharts", os.path.join(BASE_DIR,"webapp","bower_components","amcharts","dist","amcharts")),
+                    #("styles", os.path.join(BASE_DIR,"webapp","dist","styles")),
+                    #("scripts", os.path.join(BASE_DIR,"webapp","dist","scripts")),
+                    #("fonts", os.path.join(BASE_DIR,"webapp","dist","fonts")),
                     ]
 
 LOGGING = {
@@ -173,6 +186,11 @@ LOGGING = {
     },
     'loggers': {
         'pvs': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'pvs.views_admin': {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False

@@ -19,7 +19,12 @@ from django.views.decorators.csrf import csrf_exempt
 from mysite import sphinx_doc_view
 
 from pvs.views import pvs_report, pvs_dbconfig
+
 from pvs.views_admin import admin_view
+#from console.views import webapp_console
+
+from pvs.views_user import UserPVStationView
+from pvs.views_admin import ConsoleMatrixView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -28,7 +33,11 @@ urlpatterns = [
     url(r'^pvs/report/(?P<api_version>\w+)/$', csrf_exempt(pvs_report)),
     url(r'^pvs/dbconfig/$', csrf_exempt(pvs_dbconfig)),
     
-    url(r'^console/$', admin_view),
+    url(r'^console/all/$', admin_view),
+    #url(r'^console/$', webapp_console),
+    url(r'^console/$', ConsoleMatrixView.as_view(),name='console_matrix_view'),
+
+    url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView.as_view(),name='user_pvs_view'),
 
     url(r'^$', sphinx_doc_view),
     
