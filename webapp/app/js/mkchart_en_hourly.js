@@ -107,5 +107,6 @@ var chart_hourly = AmCharts.makeChart("pvs_chart_en_hourly", {
   },
   "export": {
     "enabled": true
-  }
+  },
+  "panEventsEnabled": false,
 });
