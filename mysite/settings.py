@@ -28,7 +28,7 @@ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['server-dot-solar-cloud-143410.appspot.com']
 
 
 # Application definition

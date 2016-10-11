@@ -44,3 +44,5 @@ libraries:
 - name: MySQLdb
   version: 1.2.5
 # [END django_app]
+- name: ssl
+  version: latest
