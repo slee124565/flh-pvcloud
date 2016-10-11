@@ -23,7 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '%*03qgpl^b)gxyle&gwj0_2*nk9e0tl38lsch31uy0c_a7yitl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+    DEBUG = False
+else:
+    DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -185,6 +188,11 @@ LOGGING = {
         'pvs': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False
+        },
+        'pvs.views_admin': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': False
         },
     }

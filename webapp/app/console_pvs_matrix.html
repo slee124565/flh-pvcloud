@@ -90,11 +90,11 @@
                     <div id="{{ pvs.chart_id }}" style="width:100%; height:300px" alt="{{ pvs.serial }}"></div>
                 </a>
                 <h3>
-                    <a href="{{ pvs.url }}">{{ pvs.address }}</a>
+                    <a href="{{ pvs.url }}" class="btn btn-{{ pvs.class_text }}" role="button">{{ pvs.address }}</a>
                 </h3>
                 <p>public ip address: {{ pvs.public_ip }}</p>
                 <p>local ip address: {{ pvs.private_ip }}</p>
-                <p>last report time: {{ pvs.last_update_time }}</p>
+                <p class="text-{{ pvs.class_text}}">last report time: {{ pvs.last_update_time }}</p>
             </div>
             {% endfor %}
         </div>
