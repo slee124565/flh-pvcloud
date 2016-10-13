@@ -40,24 +40,28 @@ var chart_hourly = AmCharts.makeChart("pvs_chart_en_hourly", {
     ],
   "startDuration": 1,
   "graphs": [{
-		"alphaField": "alpha",
+		//"alphaField": "alpha",
 		"balloonText": "<span style='font-size:12px;'>[[title]] in [[category]]<br><span style='font-size:20px;'>[[value]]</span> [[additional]]</span>",
-		"fillAlphas": 1,
-		"type": "column",
+        "fillAlphas": 0.6,
+        "lineAlpha": 0.4,
+		//"type": "column",
 		"title": "PVI(1)",
 		"valueField": "1",
 		"valueAxis": "energyAxis",
-		"dashLengthField": "dashLengthColumn"
+		"dashLengthField": "dashLengthColumn",
+        "type": "smoothedLine",
   	},
   	{
 	    "alphaField": "alpha",
 	    "balloonText": "<span style='font-size:12px;'>[[title]] in [[category]]<br><span style='font-size:20px;'>[[value]]</span> [[additional]]</span>",
-	    "fillAlphas": 1,
-	    "type": "column",
+        "fillAlphas": 0.6,
+        "lineAlpha": 0.4,
+	    //"type": "column",
 	    "title": "PVI(2)",
 	    "valueField": "2",
 	    "valueAxis": "energyAxis",
-	    "dashLengthField": "dashLengthColumn"
+	    "dashLengthField": "dashLengthColumn",
+        "type": "smoothedLine",
 	},
 	/*{
     "id": "graph3",
@@ -77,6 +81,11 @@ var chart_hourly = AmCharts.makeChart("pvs_chart_en_hourly", {
     "valueAxis": "uvAxis",
 	},*/
 	],
+    "chartCursor": {
+        "cursorAlpha": 0,
+        "zoomable": false,
+        "categoryBalloonDateFormat": "JJ:NN",
+    },
   "dataDateFormat": "YYYY-MM-DD JJ:NN:SS",
   "categoryField": "date",
   "categoryAxis": {
@@ -107,5 +116,6 @@ var chart_hourly = AmCharts.makeChart("pvs_chart_en_hourly", {
   },
   "export": {
     "enabled": true
-  }
+  },
+  "panEventsEnabled": false,
 });

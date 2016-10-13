@@ -89,6 +89,7 @@ var chart_daily = AmCharts.makeChart("pvs_chart_en_daily_total", {
   },
   "export": {
     "enabled": true
-  }
+  },
+  "panEventsEnabled": false,
 });
 

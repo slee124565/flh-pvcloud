@@ -107,5 +107,6 @@ var config_0000000097894c9b = {
   },
   "export": {
     "enabled": true
-  }
+  },
+  "panEventsEnabled": false,
 };

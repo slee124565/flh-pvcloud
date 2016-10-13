@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from .models import Report, Energy
 
@@ -108,12 +109,17 @@ class ConsoleMatrixView(TemplateView):
         pvslist = []
         row_count = 0 # pagenation usage
         col_count = 0
+        logger.debug('current timezone name %s' % timezone.get_current_timezone_name())
         report_expire_time = datetime.now() + timedelta(minutes=-20)
+        logger.debug('report_expire_time: %s, and awared is %s' % (str(report_expire_time),
+                                                                   timezone.is_aware(report_expire_time)))
         logger.debug('report_expire_time: %s' % report_expire_time)
         for p_serial in Energy.get_distinct_serial():
             p_report = Report.objects.filter(serial=p_serial)[0]
             logger.debug('report time: %s, expired %s' % (p_report.last_update_time,
                                                           str((p_report.last_update_time < report_expire_time))))
+            logger.debug('last_update_time: %s, and awared is %s' % (str(p_report.last_update_time),
+                                                                   timezone.is_aware(p_report.last_update_time)))
             p_meta = {'serial': p_serial, 
                         'address': json.loads(p_report.dbconfig).get('accuweather').get('address'),
                         'public_ip': p_report.ip,

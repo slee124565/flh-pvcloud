@@ -77,6 +77,12 @@ var chart_daily_stacked = AmCharts.makeChart("pvs_chart_en_daily", {
 	    "valueField": "visibility",
 	     "valueAxis": "visibilityAxis",
 	  }*/],
+    "chartCursor": {
+        "cursorAlpha": 0,
+        "zoomable": false,
+        "categoryBalloonDateFormat": "MMM-DD",
+    },
+
 	  "dataDateFormat": "YYYY-MM-DD",
 	  "categoryField": "date",
 	  "categoryAxis": {
@@ -100,5 +106,6 @@ var chart_daily_stacked = AmCharts.makeChart("pvs_chart_en_daily", {
 	  },
 	  "export": {
 	    "enabled": true
-	  }
+	  },
+	  "panEventsEnabled": false,
 	});
