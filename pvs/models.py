@@ -210,7 +210,8 @@ class Energy(models.Model):
         logger.debug('param date_since = %s' % str(date_since))
 
         queryset = Energy.objects.filter(type='en_today',
-                                         create_time__date__gte=date_since
+                                         create_time__date__gte=date_since,
+                                         create_time__hour__gte=3
                                 ).extra({'en_date':'date(create_time)'}
                                 ).values('serial','modbus_id','en_date'
                                 ).annotate(max_value=Max('value'))
