@@ -110,17 +110,19 @@ class ConsoleMatrixView(TemplateView):
         row_count = 0 # pagenation usage
         col_count = 0
         logger.debug('current timezone name %s' % timezone.get_current_timezone_name())
+        logger.debug('default timezone name %s' % timezone.get_default_timezone_name())
         report_expire_time = datetime.now() + timedelta(minutes=-20)
         logger.debug('report_expire_time: %s, and awared is %s' % (str(report_expire_time),
                                                                    timezone.is_aware(report_expire_time)))
-        logger.debug('report_expire_time: %s' % report_expire_time)
         tz_default = timezone.get_default_timezone()
+        tz_current = timezone.get_current_timezone()
         for p_serial in Energy.get_distinct_serial():
             p_report = Report.objects.filter(serial=p_serial)[0]
             logger.debug('report time: %s, expired %s' % (p_report.last_update_time,
                                                           str((p_report.last_update_time < report_expire_time))))
             logger.debug('last_update_time: %s, and awared is %s' % (str(p_report.last_update_time),
                                                                    timezone.is_aware(p_report.last_update_time)))
+            tz_last_update_time = timezone.make_aware(p_report.last_update_time, tz_default)
             p_meta = {'serial': p_serial, 
                         'address': json.loads(p_report.dbconfig).get('accuweather').get('address'),
                         'public_ip': p_report.ip,
@@ -129,8 +131,8 @@ class ConsoleMatrixView(TemplateView):
                         #'last_update_time': p_report.last_update_time.strftime('%Y-%m-%d %H:%M:%S'),
                         'last_update_time': timezone.make_aware(p_report.last_update_time,
                                                                 tz_default).strftime('%Y-%m-%d %H:%M:%S'),
-                        'class_text': 'danger' if (p_report.last_update_time < report_expire_time) 
-                                        else 'success',
+                        'class_text': 'danger' if (timezone.make_aware(p_report.last_update_time,tz_current) < report_expire_time) 
+                                                else 'success',
                         'chart_id': 'chart_id_%s' % p_serial,
                         'chart_data_var': 'data_%s' % p_serial,
                         'chart_data_value': json.dumps(PvsManager.prepare_pvs_energy_hourly_output_data(p_serial)),
