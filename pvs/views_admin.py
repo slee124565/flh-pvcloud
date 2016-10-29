@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.conf import settings
 
 from .models import Report, Energy
 
@@ -114,12 +115,12 @@ class ConsoleMatrixView(TemplateView):
         report_expire_time = timezone.make_aware(datetime.now() + timedelta(minutes=-20))
         logger.debug('report_expire_time: %s, and awared is %s' % (str(report_expire_time),
                                                                    timezone.is_aware(report_expire_time)))
-        tz_default = timezone.get_default_timezone()
-        tz_current = timezone.get_current_timezone()
+        logger.debug('TIME_ZONE settings: %s' % getattr(settings,'TIME_ZONE'))
         for p_serial in Energy.get_distinct_serial():
             p_report = Report.objects.filter(serial=p_serial)[0]
             tz_local_last_update_time = timezone.localtime(timezone.make_aware(p_report.last_update_time,timezone.utc))
-            tz_console_last_update_time = timezone.localtime(tz_local_last_update_time,timezone.get_default_timezone())
+            tz_console_last_update_time = timezone.localtime(tz_local_last_update_time,
+                                                            timezone.get_fixed_timezone(timedelta(hours=+8)))
             logger.debug('report time: (%s,%s), expired %s' % (p_report.last_update_time,tz_local_last_update_time,
                                                           str((tz_local_last_update_time < report_expire_time))))
             p_meta = {'serial': p_serial, 
