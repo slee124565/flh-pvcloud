@@ -114,6 +114,7 @@ class ConsoleMatrixView(TemplateView):
         logger.debug('report_expire_time: %s, and awared is %s' % (str(report_expire_time),
                                                                    timezone.is_aware(report_expire_time)))
         logger.debug('report_expire_time: %s' % report_expire_time)
+        tz_default = timezone.get_default_timezone()
         for p_serial in Energy.get_distinct_serial():
             p_report = Report.objects.filter(serial=p_serial)[0]
             logger.debug('report time: %s, expired %s' % (p_report.last_update_time,
@@ -125,7 +126,9 @@ class ConsoleMatrixView(TemplateView):
                         'public_ip': p_report.ip,
                         'private_ip': p_report.local_ip,
                         'url': reverse('user_pvs_view',args=(p_serial,)),
-                        'last_update_time': p_report.last_update_time.strftime('%Y-%m-%d %H:%M:%S'),
+                        #'last_update_time': p_report.last_update_time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'last_update_time': timezone.make_aware(p_report.last_update_time,
+                                                                tz_default).strftime('%Y-%m-%d %H:%M:%S'),
                         'class_text': 'danger' if (p_report.last_update_time < report_expire_time) 
                                         else 'success',
                         'chart_id': 'chart_id_%s' % p_serial,
