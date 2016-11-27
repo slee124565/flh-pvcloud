@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import TemplateView
 from mysite import sphinx_doc_view
 
 from pvs.views import pvs_report, pvs_dbconfig
@@ -38,6 +39,9 @@ urlpatterns = [
     url(r'^console/$', ConsoleMatrixView.as_view(),name='console_matrix_view'),
 
     url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView.as_view(),name='user_pvs_view'),
+    
+    url(r'', TemplateView.as_view(template_name='ang/default.html')),
+    
 
     url(r'^$', sphinx_doc_view),
     
