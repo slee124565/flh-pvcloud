@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!doctype html>
 <html>
   <head>
@@ -8,11 +9,11 @@
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.css' %}" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
-    <link rel="stylesheet" href="styles/style_totomo.css">
+    <link rel="stylesheet" href="{% static 'styles/style_totomo.css' %}">
     <!-- endbuild -->
   </head>
   <body ng-app="pvcApp">
@@ -36,23 +37,23 @@
       
     <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
-    <script src="bower_components/jquery/dist/jquery.js"></script>
-    <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="bower_components/angular-resource/angular-resource.js"></script>
-    <script src="bower_components/angular-route/angular-route.js"></script>
-    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
-    <script src="bower_components/amcharts3/amcharts/amcharts.js"></script>
-    <script src="bower_components/amcharts3/amcharts/serial.js"></script>
+    <script src="{% static 'bower_components/jquery/dist/jquery.js' %}"></script>
+    <script src="{% static 'bower_components/angular/angular.js' %}"></script>
+    <script src="{% static 'bower_components/bootstrap/dist/js/bootstrap.js' %}"></script>
+    <script src="{% static 'bower_components/angular-resource/angular-resource.js' %}"></script>
+    <script src="{% static 'bower_components/angular-route/angular-route.js' %}"></script>
+    <script src="{% static 'bower_components/angular-ui-router/release/angular-ui-router.js' %}"></script>
+    <script src="{% static 'bower_components/amcharts3/amcharts/amcharts.js' %}"></script>
+    <script src="{% static 'bower_components/amcharts3/amcharts/serial.js' %}"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
-        <script src="scripts/app.js"></script>
-        <script src="scripts/controllers/main.js"></script>
-        <script src="scripts/controllers/about.js"></script>
-        <script src="scripts/controllers/user.js"></script>
-        <script src="scripts/controllers/usersite.js"></script>
+        <script src="{% static 'scripts/app.js' %}"></script>
+        <script src="{% static 'scripts/controllers/main.js' %}"></script>
+        <script src="{% static 'scripts/controllers/about.js' %}"></script>
+        <script src="{% static 'scripts/controllers/user.js' %}"></script>
+        <script src="{% static 'scripts/controllers/usersite.js' %}"></script>
         <!-- endbuild -->
 </body>
 </html>

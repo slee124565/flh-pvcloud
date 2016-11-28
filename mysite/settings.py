@@ -59,6 +59,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+                os.path.join(BASE_DIR,'pvcApp','app','views'),
                 os.path.join(BASE_DIR,'webapp','app'),
                 os.path.join(BASE_DIR,'templates')
             ],
@@ -159,6 +160,10 @@ STATICFILES_DIRS = [
                     ("js", os.path.join(BASE_DIR,"webapp","app","js")),
                     ("css", os.path.join(BASE_DIR,"webapp","app","css")),
                     ("amcharts", os.path.join(BASE_DIR,"webapp","bower_components","amcharts","dist","amcharts")),
+                    ("bower_components", os.path.join(BASE_DIR,"pvcApp","bower_components")),
+                    ("styles", os.path.join(BASE_DIR,"pvcApp","app","styles")),
+                    ("scripts", os.path.join(BASE_DIR,"pvcApp","app","scripts")),
+                    ("images", os.path.join(BASE_DIR,"pvcApp","app","images")),
                     #("styles", os.path.join(BASE_DIR,"webapp","dist","styles")),
                     #("scripts", os.path.join(BASE_DIR,"webapp","dist","scripts")),
                     #("fonts", os.path.join(BASE_DIR,"webapp","dist","fonts")),

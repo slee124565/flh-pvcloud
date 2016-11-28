@@ -27,6 +27,8 @@ from pvs.views_admin import admin_view
 from pvs.views_user import UserPVStationView
 from pvs.views_admin import ConsoleMatrixView
 
+from ang.views import AngularTemplateView
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
@@ -40,6 +42,7 @@ urlpatterns = [
 
     url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView.as_view(),name='user_pvs_view'),
     
+    url(r'^views/(?P<item>[A-Za-z0-9\_\-\.\/]+)\.html$',  AngularTemplateView.as_view()),
     url(r'', TemplateView.as_view(template_name='ang/default.html')),
     
 
