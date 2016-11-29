@@ -8,17 +8,23 @@
  * Controller of the pvcApp
  */
 angular.module('pvcApp')
-  .controller('UsersiteCtrl', ['$scope','$window', function ($scope,$window) {
-	    this.awesomeThings = [
-	                          'HTML5 Boilerplate',
-	                          'AngularJS',
-	                          'Karma'
-	                        ];
+  .controller('UsersiteCtrl', ['$scope','$window', '$stateParams', 'PVServer',
+  function ($scope,$window,$stateParams,PVServer) {
+	console.log('param serial: ' + $stateParams.serial);
+	
+	var entry = PVServer.get({serial:$stateParams.serial});
+	console.log('entry: ' + JSON.stringify(entry))
+	
+	this.awesomeThings = [
+	                      'HTML5 Boilerplate',
+	                      'AngularJS',
+	                      'Karma'
+	                    ];
     $scope.site = {
         title: '太陽能發電系統',
         description: '台北市承德路三段90巷測試中',
         content: { 
-            title: '再生能源 – 太陽能即時發電狀況',
+            title: '再生能源 – 太陽能即時發電狀況 ' + entry.version,
             summary: {
                 energy: {
                     today: 2.67,
