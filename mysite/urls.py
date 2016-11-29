@@ -27,7 +27,7 @@ from pvs.views_admin import admin_view
 from pvs.views_user import UserPVStationView
 from pvs.views_admin import ConsoleMatrixView
 
-from ang.views import AngularTemplateView
+from ang.views import AngularTemplateView, UserAppWebAPIView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^uapp/$', 
         TemplateView.as_view(template_name='ang/user_webapp.html'), name='user_pvs_view'),    
     url(r'^uapp/views/(?P<item>[A-Za-z0-9\_\-\.\/]+)\.html$',  AngularTemplateView.as_view()),
+    url(r'^uapp/api/(?P<pvs_serial>\w+)$', UserAppWebAPIView.as_view()),
 
     # -- default page -- #
     url(r'^$', sphinx_doc_view),
