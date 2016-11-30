@@ -12,19 +12,21 @@ angular.module('pvcApp')
   function ($scope,$window,$stateParams,PVServer) {
 	console.log('param serial: ' + $stateParams.serial);
 	
-	var entry = PVServer.get({serial:$stateParams.serial});
-	console.log('entry: ' + JSON.stringify(entry))
-	
-	this.awesomeThings = [
-	                      'HTML5 Boilerplate',
-	                      'AngularJS',
-	                      'Karma'
-	                    ];
-    $scope.site = {
+	PVServer.getPVSMeta($stateParams.serial).then(
+		function(response) {
+			console.log('resp data: ' + response.data)
+			$scope.siteMeta = response.data;
+			console.log('version: ' + $scope.siteMeta.version);
+			},
+		function(response){
+			console.log('http error' + response.status + " " + response.statusText);
+			});
+
+	$scope.site = {
         title: '太陽能發電系統',
         description: '台北市承德路三段90巷測試中',
         content: { 
-            title: '再生能源 – 太陽能即時發電狀況 ' + entry.version,
+            title: '再生能源 – 太陽能即時發電狀況 ',
             summary: {
                 energy: {
                     today: 2.67,

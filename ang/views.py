@@ -27,3 +27,5 @@ class UserAppWebAPIView(View):
         # TODO: get_pvs_meta
         
         return JsonResponse(pvs_meta)
+        #logger.debug('resp data: %s' % json.dumps(pvs_meta))
+        #return HttpResponse(json.dumps(pvs_meta))

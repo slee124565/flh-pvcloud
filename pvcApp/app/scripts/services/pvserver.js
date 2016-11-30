@@ -9,7 +9,9 @@
  */
 angular.module('pvcApp')
   .constant('apiBaseURL', 'http://localhost:8000/')
-  .service('PVServer', [ '$resource','apiBaseURL', function ($resource, apiBaseURL) {
+  .service('PVServer', [ '$http','apiBaseURL', function ($http, apiBaseURL) {
     // AngularJS will instantiate a singleton by calling "new" on this function
-	return $resource( apiBaseURL + 'uapp/api/:serial');
+	  this.getPVSMeta = function(serial) {
+		return $http.get( apiBaseURL + 'uapp/api/' + serial);
+	  };
   }]);
