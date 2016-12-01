@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.db.models import Count, Max
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 
 import json
 import logging
@@ -232,6 +232,68 @@ class Energy(models.Model):
             en_day[entry.get('modbus_id')] = entry.get('max_value') * 10
             
         return en_daily_list
+    
+    @classmethod
+    def get_monthly_output(cls,pvs_serial=None,date_since=None):
+        '''return a json data of pvs energy monthly output value for specific pvs serial, 
+        if pvs_serial is None, it will return all pvs energy daily output json data
+        ::
+            [
+                {'date': 'YYYY-mm-dd', 
+                '<modbus_id>': xx, '<modbus_id>': xx, ...},
+                ...
+            ]
+        '''
+        DEFAULT_MONTH_SINCE = 18
+        if date_since is None:
+            date_since = (datetime.today() + timedelta(days=-DEFAULT_MONTH_SINCE*30)).date()
+            date_since = date(date_since.year,date_since.month,1)
+        logger.debug('param date_since = %s' % str(date_since))
+        
+        eng_daily_output = cls.get_energy_daily_output(pvs_serial, date_since)
+        logger.debug('get energy daily output count %d since %s' % (len(eng_daily_output), date_since))
+
+        eng_montly_list = {}
+        for t_serial in eng_daily_output:
+            logger.debug('processing pvs serial %s' % t_serial)
+            t_pvs_eng_monthly_list = {}
+            t_pvs_daily_list = eng_daily_output[t_serial]
+            eng_montly_list[t_serial] = t_pvs_eng_monthly_list
+            logger.debug('pvs %s with entry count %d' % (t_serial,len(t_pvs_daily_list)))
+            
+            t_pvs_date_list = sorted(t_pvs_daily_list.keys())
+            #-> skip first month data if not start from the first day of that month
+            while (len(t_pvs_date_list) > 0):
+                t_date = t_pvs_date_list[0]
+                if t_date[len('YYYY-mm-'):len('YYYY-mm-')+2] != '01':
+                    logger.debug('skip date %s with day %s' % (t_pvs_date_list[0],
+                                                               t_date[len('YYYY-mm-')+1:len('YYYY-mm-')+3]))
+                    del t_pvs_date_list[0]
+                else:
+                    logger.debug('pvs montly eng since date %s' % t_pvs_date_list[0])   
+                    break
+                
+            for t_date in t_pvs_date_list:
+                t_day_entry = t_pvs_daily_list[t_date]
+                t_month_key = t_date[:len('YYYY-mm')]
+                if not t_month_key in t_pvs_eng_monthly_list:
+                    eng_month = {'date': t_month_key}
+                    for t_key in t_day_entry:
+                        if t_key != 'date':
+                            eng_month[t_key] = t_day_entry[t_key] * 10
+                    t_pvs_eng_monthly_list[t_month_key] = eng_month
+                    logger.debug('eng_month initial: %s' % eng_month)
+                else:
+                    eng_month = t_pvs_eng_monthly_list[t_month_key]
+                    for t_key in t_day_entry:
+                        if t_key != 'date':
+                            if t_key in eng_month:
+                                eng_month[t_key] += (t_day_entry[t_key] * 10)
+                            else:
+                                eng_month[t_key] = (t_day_entry[t_key] * 10)
+                    logger.debug('eng_month update: %s' % eng_month)
+        logger.debug('final %s' % eng_montly_list)
+        return eng_montly_list
     
 class Weather(models.Model):    
     serial = models.CharField('pi serial', max_length=20)
