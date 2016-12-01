@@ -193,7 +193,7 @@ LOGGING = {
     'loggers': {
         'pvs': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False
         },
         'pvs.views_admin': {

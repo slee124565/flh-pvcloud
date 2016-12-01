@@ -12,16 +12,6 @@ angular.module('pvcApp')
   function ($scope,$window,$stateParams,PVServer) {
 	console.log('param serial: ' + $stateParams.serial);
 	
-	PVServer.getPVSMeta($stateParams.serial).then(
-		function(response) {
-			console.log('resp data: ' + response.data)
-			$scope.siteMeta = response.data;
-			console.log('version: ' + $scope.siteMeta.version);
-			},
-		function(response){
-			console.log('http error' + response.status + " " + response.statusText);
-			});
-
 	$scope.site = {
         title: '太陽能發電系統',
         description: '台北市承德路三段90巷測試中',
@@ -61,6 +51,17 @@ angular.module('pvcApp')
             }
         }
     };
+
+	PVServer.getPVSMeta($stateParams.serial).then(
+			function(response) {
+				console.log('resp data: ' + response.data)
+				var siteMeta = response.data;
+				$scope.site.description = siteMeta.address;
+				},
+			function(response){
+				console.log('http error' + response.status + " " + response.statusText);
+				});
+
     
     // amCharts 
 $window.AmCharts.makeChart('amchart1', {
