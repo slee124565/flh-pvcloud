@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 import os
 import json
 
@@ -5,7 +7,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404, JsonResponse
 from django.views.generic import View
 
-from pvs.models import Report, Energy
+from pvs.models import Report
+from pvs.views_user import UserPVStationView
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,14 +25,70 @@ class AngularTemplateView(View):
             raise Http404
 
 class UserAppWebAPIView(View):
+    
+    @classmethod
+    def get_pvs_meat(cls,pvs_serial):
+        pvs_meta = {'version':'1.0'}
+        dbtool = UserPVStationView()
+        
+        
+        #-> add pvs address 
+        pvs_meta['description'] = Report.get_address(pvs_serial)
+        pvs_meta['amchart_hourly_data'] = dbtool.prepare_pvs_energy_hourly_output_data(pvs_serial)
+        pvs_meta['amchart_daily_data'] = dbtool.prepare_pvs_energy_daily_output_data(pvs_serial,2)
+        pvs_meta['amchart_monthly_data'] = dbtool.prepare_pvs_energy_monthly_output_data(pvs_serial)
+       
+        #-> get energy summary
+        pvs_meta['summary'] = {
+            'energy': {
+                'hour': 0,
+                'day': 0,
+                'month': 0
+                }
+            }
+        #-> get energy this hour
+        last_entry = pvs_meta['amchart_hourly_data'][-1]
+        logger.debug('last_entry this hour %s' % last_entry)
+        logger.debug('check with %s' % datetime.now().strftime('%Y-%m-%d %H:00:00'))
+        if last_entry['date'] == datetime.now().strftime('%Y-%m-%d %H:00:00'):
+            value = 0
+            for t_key in last_entry:
+                if t_key != 'date':
+                    value += last_entry[t_key]
+            pvs_meta['summary']['energy']['hour'] = value
+        else:
+            pvs_meta['summary']['energy']['hour'] = 'N/A'
+            
+        #-> get energy today
+        last_entry = pvs_meta['amchart_daily_data'][-1]
+        logger.debug('last_entry today %s' % last_entry)
+        logger.debug('check with %s' % date.today().strftime('%Y-%m-%d'))
+        if last_entry['date'] == date.today().strftime('%Y-%m-%d'):
+            value = 0
+            for t_key in last_entry:
+                if t_key != 'date':
+                    value += last_entry[t_key]
+            pvs_meta['summary']['energy']['day'] = value
+        else:
+            pvs_meta['summary']['energy']['day'] = 'N/A'
+
+        #-> get energy this month
+        last_entry = pvs_meta['amchart_monthly_data'][-1]
+        logger.debug('last_entry this month %s' % last_entry)
+        logger.debug('check with %s' % date.today().strftime('%Y-%m'))
+        if last_entry['date'] == date.today().strftime('%Y-%m'):
+            value = 0
+            for t_key in last_entry:
+                if t_key != 'date':
+                    value += last_entry[t_key]
+            pvs_meta['summary']['energy']['month'] = value
+        else:
+            pvs_meta['summary']['energy']['month'] = 'N/A'
+        
+        return pvs_meta
+        
     def get(self, request, pvs_serial=None, *args, **kwargs):
         logger.debug('serial %s' % pvs_serial)
-        pvs_meta = {'version':'1.0'}
-        
-        # TODO: get_pvs_meta
-        #-> add pvs address 
-        pvs_meta['address'] = Report.get_address(pvs_serial)
-        
-        return JsonResponse(pvs_meta)
+        return JsonResponse(UserAppWebAPIView.get_pvs_meat(pvs_serial))
         #logger.debug('resp data: %s' % json.dumps(pvs_meta))
         #return HttpResponse(json.dumps(pvs_meta))

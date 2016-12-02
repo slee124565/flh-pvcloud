@@ -4,6 +4,9 @@ from pvs.models import Energy, Report
 
 from datetime import date
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserPVStationView(TemplateView):
     
@@ -44,7 +47,20 @@ class UserPVStationView(TemplateView):
                 p_data.append(pvs_en_daily_data[p_en_date])
                 
         return p_data
+    
+    def prepare_pvs_energy_monthly_output_data(self,pvs_serial):
+        pvs_en_monthly_data = Energy.get_monthly_output(pvs_serial)[pvs_serial]
+        logger.debug('pvs_en_monthly_data count %d' % len(pvs_en_monthly_data))
+        p_date_list = pvs_en_monthly_data.keys()
+        p_date_list = sorted(p_date_list)
+        logger.debug('p_date_list count %d' % len(p_date_list))
         
+        p_data = []
+        for p_en_date in p_date_list:
+            p_data.append(pvs_en_monthly_data[p_en_date])
+        
+        return p_data
+    
     def get_context_data(self, **kwargs):
         context = TemplateView.get_context_data(self, **kwargs)
         pvs_serial = self.kwargs.get('pvs_serial')

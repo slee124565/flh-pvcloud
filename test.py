@@ -5,8 +5,25 @@ import django
 import json
 from datetime import timedelta, datetime, date
 
-pvs_serial = '0000000097894c9b'
-#pvs_serial = '00000000f6392e07' # tainan
+#pvs_serial = '0000000097894c9b'
+pvs_serial = '00000000f6392e07' # tainan
+
+def test_ang_View():
+    from ang.views import UserAppWebAPIView
+    print(json.dumps(UserAppWebAPIView.get_pvs_meat(pvs_serial),indent=4))
+
+def test_UserPVStationView():
+    from pvs.views_user import UserPVStationView
+    obj = UserPVStationView()
+    print('\n\n== prepare_pvs_energy_hourly_output_data ==')
+    print(json.dumps(obj.prepare_pvs_energy_hourly_output_data(pvs_serial)))
+    
+    print('\n\n== prepare_pvs_energy_daily_output_data ==')
+    print(json.dumps(obj.prepare_pvs_energy_daily_output_data(pvs_serial,2)))
+    
+    print('\n\n== prepare_pvs_energy_monthly_output_data ==')
+    print(json.dumps(obj.prepare_pvs_energy_monthly_output_data(pvs_serial)))
+    
 
 def test_pvs_energy_montly():
     from pvs.models import Energy
@@ -79,4 +96,6 @@ if __name__ == "__main__":
     
     #test_pvs_energy_hourly()
     #test_pvs_energy_daily()
-    test_pvs_energy_montly()
+    #test_pvs_energy_montly()
+    #test_UserPVStationView()
+    test_ang_View()
