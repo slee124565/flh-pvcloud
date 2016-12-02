@@ -39,7 +39,7 @@
             
             <article class="post-5 page type-page status-publish hentry">
                 <header class="entry-header">
-                  <h1 class="entry-title">{{site.content.title}}</h1>	
+                  <h1 class="entry-title">{{site.header}}</h1>	
                 </header><!-- .entry-header -->
                 
                 <div class="entry-content">
@@ -48,23 +48,23 @@
                         <caption><strong>統計報告</strong></caption>
                         <table class="table">
                             <thead>
-                                <tr><th></th><th>今日</th>
-                                <th>本月</th>
-                                <th>總計</th></tr>
+                                <tr><th></th><th>小時</th>
+                                <th>本日</th>
+                                <th>本月</th></tr>
                             </thead>
                             <tbody>
                                 <tr><th>發電量(度)</th>
-                                    <td>{{site.content.summary.energy.today | number}}</td>
-                                    <td>{{site.content.summary.energy.month | number}}</td>
-                                    <td>{{site.content.summary.energy.total | number}}</td></tr>
+                                    <td>{{site.summary.energy.hour | number}}</td>
+                                    <td>{{site.summary.energy.day | number}}</td>
+                                    <td>{{site.summary.energy.month | number}}</td></tr>
                                 <tr><th>減碳量(公斤)</th>
-                                    <td>{{site.content.summary.carbon.today | number}}</td>
-                                    <td>{{site.content.summary.carbon.month | number}}</td>
-                                    <td>{{site.content.summary.carbon.total | number}}</td></tr>
+                                    <td>{{site.summary.carbon.hour | number}}</td>
+                                    <td>{{site.summary.carbon.day | number}}</td>
+                                    <td>{{site.summary.carbon.month | number}}</td></tr>
                                 <tr><th>收益(台幣)</th>
-                                    <td>{{site.content.summary.profit.today | currency}}</td>
-                                    <td>{{site.content.summary.profit.month | currency}}</td>
-                                    <td>{{site.content.summary.profit.total | currency}}</td></tr>
+                                    <td>{{site.summary.profit.hour | currency}}</td>
+                                    <td>{{site.summary.profit.day | currency}}</td>
+                                    <td>{{site.summary.profit.month | currency}}</td></tr>
                             </tbody>
                         </table>
                     </div><!-- .well -->
@@ -73,10 +73,9 @@
                         <div>
                             <!-- Nav tabs -->
                             <ul class="nav nav-tabs tabs-left" role="tablist">
-                            <li role="presentation" class="active"><a href="#engHourly" aria-controls="engHourly" role="tab" data-toggle="tab">Hourly</a></li>
-                            <li role="presentation"><a href="#engDaily" aria-controls="engDaily" role="tab" data-toggle="tab">Daily</a></li>
-                            <li role="presentation"><a href="#engMonthly" aria-controls="engMonthly" role="tab" data-toggle="tab">Monthly</a></li>
-                            <li role="presentation"><a href="#engYearly" aria-controls="engYearly" role="tab" data-toggle="tab">Yearly</a></li>
+	                            <li role="presentation" class="active"><a href="#engHourly" aria-controls="engHourly" role="tab" data-toggle="tab">Hourly</a></li>
+	                            <li role="presentation"><a href="#engDaily" aria-controls="engDaily" role="tab" data-toggle="tab">Daily</a></li>
+	                            <li role="presentation"><a href="#engMonthly" aria-controls="engMonthly" role="tab" data-toggle="tab">Monthly</a></li>
                             </ul>
 
                             <!-- Tab panes -->
@@ -85,7 +84,6 @@
                                 <div role="tabpanel" class="tab-pane active" id="engHourly">...</div>
                                 <div role="tabpanel" class="tab-pane" id="engDaily">...</div>
                                 <div role="tabpanel" class="tab-pane" id="engMonthly">...</div>
-                                <div role="tabpanel" class="tab-pane" id="engYearly">...</div>
                                 --> 
                                 <div id="amchart1" style="width: 100%; height: 300px;"></div>    
                             </div>
