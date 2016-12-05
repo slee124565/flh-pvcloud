@@ -34,7 +34,7 @@ angular
     })
     .state({
         name: 'userSite',
-        url: '/userSite',
+        url: '/userSite/:serial',
         templateUrl: 'views/usersite.html',
         controller: 'UsersiteCtrl'
     });
