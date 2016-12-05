@@ -24,7 +24,7 @@ from pvs.views import pvs_report, pvs_dbconfig
 from pvs.views_admin import admin_view
 #from console.views import webapp_console
 
-from pvs.views_user import UserPVStationView
+from pvs.views_user import UserPVStationView, UserPVStationView2
 from pvs.views_admin import ConsoleMatrixView
 
 from ang.views import AngularTemplateView, UserAppWebAPIView
@@ -41,8 +41,10 @@ urlpatterns = [
     #url(r'^console/$', webapp_console),
     url(r'^console/$', ConsoleMatrixView.as_view(),name='console_matrix_view'),
 
+    #url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView.as_view(),name='user_pvs_view_v1'),
+    url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView2.as_view(),name='user_pvs_view_v1'),
+
     # -- angJS app view -- #
-    #url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView.as_view(),name='user_pvs_view'),
     url(r'^uapp/$', 
         TemplateView.as_view(template_name='ang/user_webapp.html'), name='user_pvs_view'),    
     url(r'^uapp/views/(?P<item>[A-Za-z0-9\_\-\.\/]+)\.html$',  AngularTemplateView.as_view()),

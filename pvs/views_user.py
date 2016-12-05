@@ -1,13 +1,23 @@
 from django.views.generic import TemplateView
+from django.shortcuts import redirect
+from django.core.urlresolvers import reverse
 
 from pvs.models import Energy, Report
 
 from datetime import date
 import json
 import logging
+from django.views.generic.base import View
 
 logger = logging.getLogger(__name__)
 
+class UserPVStationView2(View):
+
+    def get(self, request, pvs_serial, *args, **kwargs):
+        print(pvs_serial)
+        return redirect(reverse('user_pvs_view') + '#/userSite/' + pvs_serial)
+
+#-> deprecated by UserPVStationView2
 class UserPVStationView(TemplateView):
     
     template_name = 'pvstation.html'
@@ -78,5 +88,6 @@ class UserPVStationView(TemplateView):
             context['copyright_year'] = date.today().year
             
         return context
+
     
     
