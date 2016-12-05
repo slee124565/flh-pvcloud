@@ -15,6 +15,7 @@ angular
   ])
   .config(function ($stateProvider, $urlRouterProvider) {
     $stateProvider
+    /*
     .state({
         name: 'app',
         url: '/app',
@@ -31,7 +32,7 @@ angular
         name: 'contact',
         url: '/contact',
         template: '<p>This is the contact view.</p>'
-    })
+    })*/
     .state({
         name: 'userSite',
         url: '/userSite/:serial',
@@ -39,6 +40,6 @@ angular
         controller: 'UsersiteCtrl'
     });
     
-    $urlRouterProvider.otherwise('/userSite');
+    //$urlRouterProvider.otherwise('/userSite');
     
   });

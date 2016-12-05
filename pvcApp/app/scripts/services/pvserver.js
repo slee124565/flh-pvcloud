@@ -13,7 +13,7 @@ angular.module('pvcApp')
   .service('PVServer', [ '$http','apiBaseURL', function ($http, apiBaseURL) {
     // AngularJS will instantiate a singleton by calling "new" on this function
 	  this.getPVSMeta = function(serial) {
-		  console.log('apiBaseURL: ' + apiBaseURL);
-		return $http.get( apiBaseURL + 'uapp/api/' + serial);
+		  //console.log('apiBaseURL: ' + apiBaseURL);
+		  return $http.get( apiBaseURL + 'uapp/api/' + serial);
 	  };
   }]);
