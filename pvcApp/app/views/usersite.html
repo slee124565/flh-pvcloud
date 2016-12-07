@@ -40,9 +40,12 @@
         <main id="main" class="site-main" role="main">
             
             <article class="post-5 page type-page status-publish hentry">
+                <!--  
                 <header class="entry-header">
                   <h1 class="entry-title">{{site.header}}</h1>	
-                </header><!-- .entry-header -->
+                </header>
+                -->
+                <!-- .entry-header -->
                 
                 <div class="entry-content">
 
@@ -50,23 +53,26 @@
                         <caption><strong>統計報告</strong></caption>
                         <table class="table">
                             <thead>
-                                <tr><th></th><th>小時</th>
-                                <th>本日</th>
-                                <th>本月</th></tr>
+                                <tr>
+                                <th></th>
+	                                <th>當日</th>
+	                                <th>當月</th>
+	                                <th>當年</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <tr><th>發電量(度)</th>
-                                    <td>{{site.summary.energy.hour | number}}</td>
                                     <td>{{site.summary.energy.day | number}}</td>
                                     <td>{{site.summary.energy.month | number}}</td></tr>
+                                    <td>{{site.summary.energy.year | number}}</td>
                                 <tr><th>減碳量(公斤)</th>
-                                    <td>{{site.summary.carbon.hour | number}}</td>
                                     <td>{{site.summary.carbon.day | number}}</td>
                                     <td>{{site.summary.carbon.month | number}}</td></tr>
+                                    <td>{{site.summary.carbon.year | number}}</td>
                                 <tr><th>收益(台幣)</th>
-                                    <td>{{site.summary.profit.hour | currency}}</td>
                                     <td>{{site.summary.profit.day | currency}}</td>
                                     <td>{{site.summary.profit.month | currency}}</td></tr>
+                                    <td>{{site.summary.profit.year | currency}}</td>
                             </tbody>
                         </table>
                     </div><!-- .well -->
