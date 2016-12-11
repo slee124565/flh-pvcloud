@@ -25,6 +25,14 @@ class UserPVStationView(TemplateView):
     ENERGY_DATA_TYPE_TOTAL = 1
     ENERGY_DATA_TYPE_STACKED = 2
     
+    @classmethod
+    def turn_energy_into_kwh_unit(cls, p_data):
+        for entry in p_data:
+            for key in entry:
+                if key != 'date':
+                    entry[key] = round((entry[key] * 0.001),2)
+        return p_data
+    
     def prepare_pvs_energy_hourly_output_data(self, pvs_serial):
         
         pvs_en_hourly_data = Energy.get_calculated_energy_hourly_output(pvs_serial)[pvs_serial]
@@ -35,7 +43,7 @@ class UserPVStationView(TemplateView):
         for p_date in p_date_list:
             p_data.append(pvs_en_hourly_data[p_date])
         
-        return p_data
+        return UserPVStationView.turn_energy_into_kwh_unit(p_data)
         
     def prepare_pvs_energy_daily_output_data(self,pvs_serial,en_daily_data_type=ENERGY_DATA_TYPE_TOTAL):
         
@@ -51,12 +59,12 @@ class UserPVStationView(TemplateView):
                 for key in pvs_en_daily_data[p_en_date]:
                     if key != 'date':
                         entry_data['energy'] += pvs_en_daily_data[p_en_date][key]
-                p_data.append(entry_data)
+                p_data.append([entry_data[0],entry_data[1]*0.001])
         elif en_daily_data_type == self.ENERGY_DATA_TYPE_STACKED:
             for p_en_date in p_date_list:
                 p_data.append(pvs_en_daily_data[p_en_date])
                 
-        return p_data
+        return UserPVStationView.turn_energy_into_kwh_unit(p_data)
     
     def prepare_pvs_energy_monthly_output_data(self,pvs_serial):
         pvs_en_monthly_data = Energy.get_monthly_output(pvs_serial)[pvs_serial]
@@ -69,7 +77,20 @@ class UserPVStationView(TemplateView):
         for p_en_date in p_date_list:
             p_data.append(pvs_en_monthly_data[p_en_date])
         
-        return p_data
+        return UserPVStationView.turn_energy_into_kwh_unit(p_data)
+
+    def prepare_pvs_energy_yearly_output_data(self,pvs_serial):
+        pvs_en_yearly_data = Energy.get_yearly_output(pvs_serial)[pvs_serial]
+        logger.debug('pvs_en_yearly_data count %d' % len(pvs_en_yearly_data))
+        p_date_list = pvs_en_yearly_data.keys()
+        p_date_list = sorted(p_date_list)
+        logger.debug('p_date_list count %d' % len(p_date_list))
+        
+        p_data = []
+        for p_en_date in p_date_list:
+            p_data.append(pvs_en_yearly_data[p_en_date])
+        
+        return UserPVStationView.turn_energy_into_kwh_unit(p_data)
     
     def get_context_data(self, **kwargs):
         context = TemplateView.get_context_data(self, **kwargs)

@@ -37,6 +37,7 @@ class UserAppWebAPIView(View):
         pvs_meta['amchart_hourly_data'] = dbtool.prepare_pvs_energy_hourly_output_data(pvs_serial)
         pvs_meta['amchart_daily_data'] = dbtool.prepare_pvs_energy_daily_output_data(pvs_serial,2)
         pvs_meta['amchart_monthly_data'] = dbtool.prepare_pvs_energy_monthly_output_data(pvs_serial)
+        pvs_meta['amchart_yearly_data'] = dbtool.prepare_pvs_energy_yearly_output_data(pvs_serial)
        
         #-> get energy summary
         pvs_meta['summary'] = {
@@ -52,9 +53,9 @@ class UserAppWebAPIView(View):
         for t_key in last_entry:
             if t_key != 'date':
                 value += last_entry[t_key]
-        pvs_meta['summary']['energy']['hour'] = value * 0.001
-        pvs_meta['summary']['carbon']['hour'] = value * 0.001 * 0.637
-        pvs_meta['summary']['profit']['hour'] = value * 0.001 * 6.8633
+        pvs_meta['summary']['energy']['hour'] = value 
+        pvs_meta['summary']['carbon']['hour'] = value * 0.637
+        pvs_meta['summary']['profit']['hour'] = value * 6.8633
             
         #-> get energy today
         last_entry = pvs_meta['amchart_daily_data'][-1]
@@ -64,9 +65,9 @@ class UserAppWebAPIView(View):
         for t_key in last_entry:
             if t_key != 'date':
                 value += last_entry[t_key]
-        pvs_meta['summary']['energy']['day'] = value * 0.001
-        pvs_meta['summary']['carbon']['day'] = value * 0.001 * 0.637
-        pvs_meta['summary']['profit']['day'] = value * 0.001 * 6.8633
+        pvs_meta['summary']['energy']['day'] = value 
+        pvs_meta['summary']['carbon']['day'] = value * 0.637
+        pvs_meta['summary']['profit']['day'] = value * 6.8633
 
         #-> get energy this month
         last_entry = pvs_meta['amchart_monthly_data'][-1]
@@ -76,10 +77,22 @@ class UserAppWebAPIView(View):
         for t_key in last_entry:
             if t_key != 'date':
                 value += last_entry[t_key]
-        pvs_meta['summary']['energy']['month'] = value * 0.001
-        pvs_meta['summary']['carbon']['month'] = value * 0.001 * 0.637
-        pvs_meta['summary']['profit']['month'] = value * 0.001 * 6.8633
+        pvs_meta['summary']['energy']['month'] = value
+        pvs_meta['summary']['carbon']['month'] = value * 0.637
+        pvs_meta['summary']['profit']['month'] = value * 6.8633
         
+        #-> get energy this year
+        last_entry = pvs_meta['amchart_yearly_data'][-1]
+        logger.debug('last_entry this year %s' % last_entry)
+        logger.debug('check with %s' % date.today().strftime('%Y'))
+        value = 0
+        for t_key in last_entry:
+            if t_key != 'date':
+                value += last_entry[t_key]
+        pvs_meta['summary']['energy']['year'] = value
+        pvs_meta['summary']['carbon']['year'] = value * 0.637
+        pvs_meta['summary']['profit']['year'] = value * 6.8633
+
         return pvs_meta
         
     def get(self, request, pvs_serial=None, *args, **kwargs):

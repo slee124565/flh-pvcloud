@@ -201,10 +201,5 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False
         },
-        'pvs.views_user': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False
-        },
     }
 }
