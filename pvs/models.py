@@ -263,6 +263,7 @@ class Energy(models.Model):
             
             t_pvs_date_list = sorted(t_pvs_daily_list.keys())
             #-> skip first month data if not start from the first day of that month
+            '''
             while (len(t_pvs_date_list) > 0):
                 t_date = t_pvs_date_list[0]
                 if t_date[len('YYYY-mm-'):len('YYYY-mm-')+2] != '01':
@@ -272,6 +273,7 @@ class Energy(models.Model):
                 else:
                     logger.debug('pvs montly eng since date %s' % t_pvs_date_list[0])   
                     break
+            '''
                 
             for t_date in t_pvs_date_list:
                 t_day_entry = t_pvs_daily_list[t_date]
