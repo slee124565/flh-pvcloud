@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.db.models import Count, Max
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 
 import json
 import logging
@@ -34,7 +34,7 @@ class DbConfig(models.Model):
     create_time = models.DateTimeField('created time', default=datetime.now)
     pvs_update_time = models.DateTimeField('pvs update time', null=True)
     pvs_updated = models.BooleanField('pvs update acked', default=False)
-    
+
 class Energy(models.Model):
     
     TYPE_ENERGY_DC_LIFE = 'en_dc_life'
@@ -136,7 +136,7 @@ class Energy(models.Model):
                 ...
             ]
         '''
-        DEFAULT_DAY_SINCE = 3
+        DEFAULT_DAY_SINCE = 2
         pvs_serial_list = cls.get_distinct_serial()
         serial_list = []
         if pvs_serial is None:
@@ -191,7 +191,7 @@ class Energy(models.Model):
                 ...
             ]
         '''
-        DEFAULT_DAY_SINCE = 45
+        DEFAULT_DAY_SINCE = 30
         pvs_serial_list = cls.get_distinct_serial()
         serial_list = []
         if pvs_serial is None:
@@ -233,6 +233,122 @@ class Energy(models.Model):
             
         return en_daily_list
     
+    @classmethod
+    def get_monthly_output(cls,pvs_serial=None,date_since=None):
+        '''return a json data of pvs energy monthly output value for specific pvs serial, 
+        if pvs_serial is None, it will return all pvs energy daily output json data
+        ::
+            [
+                {'date': 'YYYY-mm', 
+                '<modbus_id>': xx, '<modbus_id>': xx, ...},
+                ...
+            ]
+        '''
+        DEFAULT_MONTH_SINCE = 12
+        if date_since is None:
+            date_since = (datetime.today() + timedelta(days=-DEFAULT_MONTH_SINCE*30)).date()
+            date_since = date(date_since.year,date_since.month,1)
+        logger.debug('param date_since = %s' % str(date_since))
+        
+        eng_daily_output = cls.get_energy_daily_output(pvs_serial, date_since)
+        logger.debug('get energy daily output count %d since %s' % (len(eng_daily_output), date_since))
+
+        eng_montly_list = {}
+        for t_serial in eng_daily_output:
+            logger.debug('processing pvs serial %s' % t_serial)
+            t_pvs_eng_monthly_list = {}
+            t_pvs_daily_list = eng_daily_output[t_serial]
+            eng_montly_list[t_serial] = t_pvs_eng_monthly_list
+            logger.debug('pvs %s with entry count %d' % (t_serial,len(t_pvs_daily_list)))
+            
+            t_pvs_date_list = sorted(t_pvs_daily_list.keys())
+            #-> skip first month data if not start from the first day of that month
+            '''
+            while (len(t_pvs_date_list) > 0):
+                t_date = t_pvs_date_list[0]
+                if t_date[len('YYYY-mm-'):len('YYYY-mm-')+2] != '01':
+                    logger.debug('skip date %s with day %s' % (t_pvs_date_list[0],
+                                                               t_date[len('YYYY-mm-')+1:len('YYYY-mm-')+3]))
+                    del t_pvs_date_list[0]
+                else:
+                    logger.debug('pvs montly eng since date %s' % t_pvs_date_list[0])   
+                    break
+            '''
+                
+            for t_date in t_pvs_date_list:
+                t_day_entry = t_pvs_daily_list[t_date]
+                t_month_key = t_date[:len('YYYY-mm')]
+                if not t_month_key in t_pvs_eng_monthly_list:
+                    eng_month = {'date': t_month_key}
+                    for t_key in t_day_entry:
+                        if t_key != 'date':
+                            eng_month[t_key] = t_day_entry[t_key]
+                    t_pvs_eng_monthly_list[t_month_key] = eng_month
+                    logger.debug('eng_month initial: %s' % eng_month)
+                else:
+                    eng_month = t_pvs_eng_monthly_list[t_month_key]
+                    for t_key in t_day_entry:
+                        if t_key != 'date':
+                            if t_key in eng_month:
+                                eng_month[t_key] += t_day_entry[t_key]
+                            else:
+                                eng_month[t_key] = t_day_entry[t_key]
+                    logger.debug('eng_month update: %s' % eng_month)
+        logger.debug('final %s' % eng_montly_list)
+        return eng_montly_list
+    
+    @classmethod
+    def get_yearly_output(cls,pvs_serial=None,date_since=None):
+        '''return a json data of pvs energy monthly output value for specific pvs serial, 
+        if pvs_serial is None, it will return all pvs energy daily output json data
+        ::
+            [
+                {'date': 'YYYY', 
+                '<modbus_id>': xx, '<modbus_id>': xx, ...},
+                ...
+            ]
+        '''
+        DEFAULT_YEAR_SINCE = 4
+        if date_since is None:
+            date_since = (datetime.today() + timedelta(days=-DEFAULT_YEAR_SINCE*365)).date()
+            date_since = date(date_since.year,date_since.month,1)
+        logger.debug('param date_since = %s' % str(date_since))
+        
+        eng_daily_output = cls.get_energy_daily_output(pvs_serial, date_since)
+        logger.debug('get energy daily output count %d since %s' % (len(eng_daily_output), date_since))
+
+        eng_yearly_list = {}
+        for t_serial in eng_daily_output:
+            logger.debug('processing pvs serial %s' % t_serial)
+            t_pvs_eng_yearly_list = {}
+            t_pvs_daily_list = eng_daily_output[t_serial]
+            eng_yearly_list[t_serial] = t_pvs_eng_yearly_list
+            logger.debug('pvs %s with entry count %d' % (t_serial,len(t_pvs_daily_list)))
+            
+            t_pvs_date_list = sorted(t_pvs_daily_list.keys())
+                
+            for t_date in t_pvs_date_list:
+                t_day_entry = t_pvs_daily_list[t_date]
+                t_year_key = t_date[:len('YYYY')]
+                if not t_year_key in t_pvs_eng_yearly_list:
+                    eng_year = {'date': t_year_key}
+                    for t_key in t_day_entry:
+                        if t_key != 'date':
+                            eng_year[t_key] = t_day_entry[t_key]
+                    t_pvs_eng_yearly_list[t_year_key] = eng_year
+                    logger.debug('eng_year initial: %s' % eng_year)
+                else:
+                    eng_year = t_pvs_eng_yearly_list[t_year_key]
+                    for t_key in t_day_entry:
+                        if t_key != 'date':
+                            if t_key in eng_year:
+                                eng_year[t_key] += t_day_entry[t_key]
+                            else:
+                                eng_year[t_key] = t_day_entry[t_key]
+                    logger.debug('eng_year update: %s' % eng_year)
+        logger.debug('final %s' % eng_yearly_list)
+        return eng_yearly_list
+
 class Weather(models.Model):    
     serial = models.CharField('pi serial', max_length=20)
     create_time = models.DateTimeField('pvs environment weather read time')
@@ -240,4 +356,16 @@ class Weather(models.Model):
     uv = models.IntegerField('UV index at site',null=True)
     visibility = models.FloatField('visibility Index at site',null=True)
     
+class EnergyData(models.Model):
+    '''sync with pvstation db table pvs_energydata'''
+    serial = models.CharField('pi serial', max_length=20)
+    data_id = models.IntegerField('rowdata id in pvs',null=True)
+    modbus_id = models.IntegerField('modbus address',null=True)
+    datetime = models.DateTimeField('energy date',null=True)
+    type = models.CharField('energy type',max_length=20,null=True)
+    value = models.IntegerField('energy value',null=True)
+    
+    def __str__(self):
+        return str(('EnergyData', self.serial,self.data_id,self.modbus_id,
+                                    self.datetime,self.type,self.value))    
     

@@ -1,0 +1,26 @@
+{
+  "name": "pvc",
+  "version": "0.0.0",
+  "dependencies": {
+    "angular": "^1.4.0",
+    "bootstrap": "^3.2.0",
+    "angular-resource": "^1.4.0",
+    "angular-route": "^1.4.0",
+    "angular-ui-router": "^0.3.2",
+    "amcharts3": "^3.20.18"
+  },
+  "devDependencies": {
+    "angular-mocks": "^1.4.0"
+  },
+  "appPath": "app",
+  "moduleName": "pvcApp",
+  "overrides": {
+    "bootstrap": {
+      "main": [
+        "less/bootstrap.less",
+        "dist/css/bootstrap.css",
+        "dist/js/bootstrap.js"
+      ]
+    }
+  }
+}

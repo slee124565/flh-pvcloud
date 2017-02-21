@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import TemplateView
 from mysite import sphinx_doc_view
 
 from pvs.views import pvs_report, pvs_dbconfig
@@ -23,12 +24,15 @@ from pvs.views import pvs_report, pvs_dbconfig
 from pvs.views_admin import admin_view
 #from console.views import webapp_console
 
-from pvs.views_user import UserPVStationView
+from pvs.views_user import UserPVStationView, UserPVStationView2
 from pvs.views_admin import ConsoleMatrixView
+
+from ang.views import AngularTemplateView, UserAppWebAPIView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
+    # -- backend api -- #
     url(r'^pvs/report/$', csrf_exempt(pvs_report)),
     url(r'^pvs/report/(?P<api_version>\w+)/$', csrf_exempt(pvs_report)),
     url(r'^pvs/dbconfig/$', csrf_exempt(pvs_dbconfig)),
@@ -37,8 +41,16 @@ urlpatterns = [
     #url(r'^console/$', webapp_console),
     url(r'^console/$', ConsoleMatrixView.as_view(),name='console_matrix_view'),
 
-    url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView.as_view(),name='user_pvs_view'),
+    #url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView.as_view(),name='user_pvs_view_v1'),
+    url(r'^user/site/(?P<pvs_serial>\w+)/$', UserPVStationView2.as_view(),name='user_pvs_view_v1'),
 
+    # -- angJS app view -- #
+    url(r'^uapp/$', 
+        TemplateView.as_view(template_name='ang/user_webapp.html'), name='user_pvs_view'),    
+    url(r'^uapp/views/(?P<item>[A-Za-z0-9\_\-\.\/]+)\.html$',  AngularTemplateView.as_view()),
+    url(r'^uapp/api/(?P<pvs_serial>\w+)$', UserAppWebAPIView.as_view()),
+
+    # -- default page -- #
     url(r'^$', sphinx_doc_view),
     
 ]

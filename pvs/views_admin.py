@@ -127,7 +127,8 @@ class ConsoleMatrixView(TemplateView):
                         'address': json.loads(p_report.dbconfig).get('accuweather').get('address'),
                         'public_ip': p_report.ip,
                         'private_ip': p_report.local_ip,
-                        'url': reverse('user_pvs_view',args=(p_serial,)),
+                        #'url': reverse('user_pvs_view',args=(p_serial,)),
+                        'url': reverse('user_pvs_view') + '#/userSite/' + p_serial,
                         #'last_update_time': p_report.last_update_time.strftime('%Y-%m-%d %H:%M:%S'),
                         'last_update_time': tz_console_last_update_time.strftime('%Y-%m-%d %H:%M:%S'),
                         'class_text': 'danger' if (tz_local_last_update_time < report_expire_time) 

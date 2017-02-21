@@ -169,14 +169,12 @@
 	{% endfor %}
     </script>
 
-	<script src="{% static "js/mkchart_en_hourly_0000000097894c9b.js" %}"></script>
-    <script src="{% static "js/mkchart_en_hourly_00000000f6392e07.js" %}"></script>
-    <script src="{% static "js/mkchart_en_hourly_0000000092a0bc9c.js" %}"></script>
+    <script src="{% static "js/mkchart_energy.js" %}"></script>
     <script>
 	{% for pvslist in pvsmatrix %}
 	{% for pvs in pvslist %}
 	{% autoescape off %}
-		var chart_hourly = AmCharts.makeChart({{ pvs.chart_id }}, config_{{ pvs.serial }});
+		make_eng_chart_hourly({{ pvs.chart_id }},{{ pvs.chart_data_value }});
 	{% endautoescape %}
 	{% endfor %}
 	{% endfor %}
