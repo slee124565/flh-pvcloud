@@ -46,7 +46,11 @@ class UserAppWebAPIView(View):
             'profit': {}
             }
         #-> get energy this hour
-        last_entry = pvs_meta['amchart_hourly_data'][-1]
+        if len(pvs_meta['amchart_hourly_data']) > 0:
+            last_entry = pvs_meta['amchart_hourly_data'][-1]
+        else:
+            last_entry = {}
+            
         logger.debug('last_entry this hour %s' % last_entry)
         logger.debug('check with %s' % datetime.now().strftime('%Y-%m-%d %H:00:00'))
         value = 0
@@ -58,7 +62,10 @@ class UserAppWebAPIView(View):
         pvs_meta['summary']['profit']['hour'] = value * 6.8633
             
         #-> get energy today
-        last_entry = pvs_meta['amchart_daily_data'][-1]
+        if len(pvs_meta['amchart_daily_data']) > 0:
+            last_entry = pvs_meta['amchart_daily_data'][-1]
+        else:
+            last_entry = {}
         logger.debug('last_entry today %s' % last_entry)
         logger.debug('check with %s' % date.today().strftime('%Y-%m-%d'))
         value = 0
@@ -70,7 +77,10 @@ class UserAppWebAPIView(View):
         pvs_meta['summary']['profit']['day'] = value * 6.8633
 
         #-> get energy this month
-        last_entry = pvs_meta['amchart_monthly_data'][-1]
+        if len(pvs_meta['amchart_monthly_data']) > 0:
+            last_entry = pvs_meta['amchart_monthly_data'][-1]
+        else:
+            last_entry = {}
         logger.debug('last_entry this month %s' % last_entry)
         logger.debug('check with %s' % date.today().strftime('%Y-%m'))
         value = 0
@@ -82,7 +92,10 @@ class UserAppWebAPIView(View):
         pvs_meta['summary']['profit']['month'] = value * 6.8633
         
         #-> get energy this year
-        last_entry = pvs_meta['amchart_yearly_data'][-1]
+        if len(pvs_meta['amchart_yearly_data']) > 0:
+            last_entry = pvs_meta['amchart_yearly_data'][-1]
+        else:
+            last_entry = {}
         logger.debug('last_entry this year %s' % last_entry)
         logger.debug('check with %s' % date.today().strftime('%Y'))
         value = 0
