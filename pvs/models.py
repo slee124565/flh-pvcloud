@@ -34,7 +34,7 @@ class DbConfig(models.Model):
     create_time = models.DateTimeField('created time', default=datetime.now)
     pvs_update_time = models.DateTimeField('pvs update time', null=True)
     pvs_updated = models.BooleanField('pvs update acked', default=False)
-    
+
 class Energy(models.Model):
     
     TYPE_ENERGY_DC_LIFE = 'en_dc_life'
@@ -354,4 +354,16 @@ class Weather(models.Model):
     uv = models.IntegerField('UV index at site',null=True)
     visibility = models.FloatField('visibility Index at site',null=True)
     
+class EnergyData(models.Model):
+    '''sync with pvstation db table pvs_energydata'''
+    serial = models.CharField('pi serial', max_length=20)
+    data_id = models.IntegerField('rowdata id in pvs',null=True)
+    modbus_id = models.IntegerField('modbus address',null=True)
+    datetime = models.DateTimeField('energy date',null=True)
+    type = models.CharField('energy type',max_length=20,null=True)
+    value = models.IntegerField('energy value',null=True)
+    
+    def __str__(self):
+        return str(('EnergyData', self.serial,self.data_id,self.modbus_id,
+                                    self.datetime,self.type,self.value))    
     
